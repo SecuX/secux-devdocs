@@ -1,0 +1,166 @@
+---
+title: Support a new blockchian
+sidebar_position: 1
+---
+
+This article explains how to use SecuX library to support a new blockchain.
+
+## Requirements
+- [Node.js](https://nodejs.org/en/download/) version >= `14` or above (which can be checked by running `node -v`). You can use nvm for managing multiple Node versions on a single machine installed.
+
+## Installation
+```bash npm
+npm install @secux/protocol-transaction
+```
+
+## Specification
+All cryptographic operations will be performed on the security chip, and your private key will be stored on the security chip. The key must be imported into SecuX through manual device manipulation.
+
+SecuX supports the following encryption curves:
+- secp256k1
+- ed25519
+
+```ts
+// the curve declaration in our code
+export enum EllipticCurve {
+  SECP256K1,
+  ED25519,
+  ED25519_ADA
+}
+```
+
+## Examples
+The following example is a React playground, and will be demonstrated using USB.
+```jsx
+import { SecuxWebUSB } from "@secux/transport-webusb";
+import { SecuxTransactionTool } from "@secux/protocol-transaction";
+import { EllipticCurve } from "@secux/protocol-transaction/lib/interface";
+
+export async function useSecuX(callback) {
+  const device = await SecuxWebUSB.Create();
+  await device.Connect();
+
+  await callback(device);
+
+  await device.Disconnect();
+}
+```
+
+:::caution notice
+
+The response data of buffer from `SecuxTransactionTool` is **base64 encoded**.
+
+:::
+
+<BrowserWindow>
+
+### How to get a publickey
+Each publickey is associated with a [bip-32](https://github.com/Bitcoin/bips/blob/master/bip-0032.mediawiki) path.
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxTransactionTool } from "@secux/protocol-transaction";
+// import { EllipticCurve } from "@secux/protocol-transaction/lib/interface";
+
+function Example(props) {
+  const [publickey, setPublickey] = useState('');
+
+  async function GeneratePublickey(device) {
+    const path = "m/44'/0'/0'/0/0";
+    const curve = EllipticCurve.SECP256K1;
+    const compressed = false; // for secp256k1
+
+    const buffer = SecuxTransactionTool.getPublickey(path, curve);
+    const response = await device.Exchange(buffer);
+    const publickey_64 = SecuxTransactionTool.resolvePublickey(
+      response, 
+      curve, 
+      compressed
+    );
+    
+    const publickey = Buffer.from(publickey_64, "base64").toString("hex");
+    setPublickey(publickey);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(GeneratePublickey)}/>
+      <h2>{publickey}</h2>
+    </div>
+  );
+}
+```
+
+### How to get a extended publickey
+Each extended publickey is associated with a [bip-32](https://github.com/Bitcoin/bips/blob/master/bip-0032.mediawiki) path.
+The supported purpose of bip-32 path and corresponding prefix is 44 (xpub-), 49 (ypub-), 84 (zpub-), 86 (xpub-).
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxTransactionTool } from "@secux/protocol-transaction";
+// import { EllipticCurve } from "@secux/protocol-transaction/lib/interface";
+
+function Example(props) {
+  const [xpublickey, setXPublickey] = useState('');
+
+  async function GenerateXPublickey(device) {
+    const path = "m/44'/0'/0'";
+    const curve = EllipticCurve.SECP256K1;
+
+    const buffer = SecuxTransactionTool.getXPublickey(path, curve);
+    const response = await device.Exchange(buffer);
+    const xpublickey = SecuxTransactionTool.resolveXPublickey(
+      response, 
+      path, 
+      curve
+    );
+    
+    setXPublickey(xpublickey);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(GenerateXPublickey)}/>
+      <h2>{xpublickey}</h2>
+    </div>
+  );
+}
+```
+
+### How to get a signature
+For showing transaction content explicitly, please [contact us](https://linktr.ee/SecuXwallet) with your implementation.
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxTransactionTool } from "@secux/protocol-transaction";
+// import { EllipticCurve } from "@secux/protocol-transaction/lib/interface";
+
+function Example(props) {
+  const [signature, setSignature] = useState('');
+
+  async function GenerateSignature(device) {
+    const path = "m/44'/0'/0'";
+    const curve = EllipticCurve.SECP256K1;
+
+    const buffer = SecuxTransactionTool.signTransaction(
+      path,
+      // hashed transaction content
+      randomBytes(32),
+      {
+        curve,
+      }
+    );
+    const response = await device.Exchange(buffer);
+    const signature_64 = SecuxTransactionTool.resolveSignature(response);
+    
+    const signature = Buffer.from(signature_64, "base64").toString("hex");
+    setSignature(signature);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(GenerateSignature)}/>
+      <h2>{signature}</h2>
+    </div>
+  );
+}
+```
+
+</BrowserWindow>

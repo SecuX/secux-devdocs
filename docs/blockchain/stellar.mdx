@@ -1,0 +1,127 @@
+---
+title: Stellar (XLM)
+---
+
+This article explains how to use SecuX to trade on Stellar.
+
+## Installation
+```bash npm
+npm install @secux/app-xlm
+```
+
+:::danger important
+
+Stellar requires accounts to **hold a minimum balance of 1 XLM** before they actually exist.
+
+:::
+
+## Examples
+The following examples will be demonstrated using usb.
+```jsx
+import { SecuxWebUSB } from "@secux/transport-webusb";
+import { SecuxXLM } from "@secux/app-xlm";
+
+export async function useSecuX(callback) {
+  const device = await SecuxWebUSB.Create();
+  await device.Connect();
+
+  await callback(device);
+
+  await device.Disconnect();
+}
+```
+
+<BrowserWindow>
+
+### Generate Address
+The following example is a React playground. Try modifying the BIP-32 path `m/44'/148'/0'` and play with it!
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxXLM } from "@secux/app-xlm";
+
+function Example(props) {
+  const [address, setAddress] = useState('');
+
+  async function GenerateAddress(device) {
+    // Modify BIP-32 path to play.
+    const path = "m/44'/148'/0'";
+    const buffer = SecuxXLM.prepareAddress(path);
+    const response = await device.Exchange(buffer);
+    const address = SecuxXLM.resolveAddress(response, path);
+
+    setAddress(address);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(GenerateAddress)}/>
+      <h2>{address}</h2>
+    </div>
+  );
+}
+```
+
+### Make Transaction
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxXLM } from "@secux/app-xlm";
+// import * as StellarSDK from "stellar-sdk";
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {
+    const path = "m/44'/148'/0'";
+    const fromAddress = await device.getAddress(path);
+    const toAddress = "<Receiving Address>";
+
+    // fetch data from stellar api
+    const api = new StellarSDK.Server('https://horizon.stellar.org');
+    const { sequence } = await api.accounts().accountId(fromAddress).call();
+    const fee = await api.fetchBaseFee();
+    const isNullAccount = async (address) => {
+      try {
+        await api.accounts().accountId(address).call();
+      }
+      catch (error) {
+        return false;
+      }
+
+      return true;
+    };
+    const needCreateAccount = await isNullAccount(toAddress);
+
+    const { commandData, serialized } = SecuxXLM.prepareSign(
+      path,
+      {
+        from: fromAddress,
+        to: toAddress,
+        amount: "1",
+        sequence,
+        fee,
+        // for new address that don't have on-chain data
+        needCreateAccount
+      }
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxXLM.resolveTransaction(response, serialized);
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
+
+:::caution notice
+
+For receiving address that is not created an account on Stellar, you must set `needCreateAccount` to **true**.
+
+:::
+
+</BrowserWindow>

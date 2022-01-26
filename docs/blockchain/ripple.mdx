@@ -9,6 +9,14 @@ This article explains how to use SecuX to trade on Ripple.
 npm install @secux/app-xrp
 ```
 
+:::danger important
+
+To have an account, **an address must hold a minimum amount of XRP** in the shared global ledger. You cannot send this XRP to other addresses. To fund a new address, you must send that address enough XRP to meet the reserve requirement.
+
+The current minimum reserve requirement is **10 XRP**.
+
+:::
+
 ## Examples
 The following examples will be demonstrated using usb.
 ```jsx
@@ -76,7 +84,7 @@ function Example(props) {
       TransactionType: "Payment",
       Account: SecuxXRP.addressConvert(publickey),
       Destination: "<Receiving Address>",
-      Amount: 1e6
+      Amount: 10 * 1e6
     };
     payment = await api.autofill(payment);
 
@@ -102,5 +110,7 @@ function Example(props) {
   );
 }
 ```
+
+
 
 </BrowserWindow>

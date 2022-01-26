@@ -1,6 +1,6 @@
 ---
 title: Ethereum (ETH)
-sidebar_position: 2
+sidebar_position: 3
 ---
 
 This article explains how to use SecuX to trade on Ethereum.
@@ -25,7 +25,7 @@ The following transaction types are supported on SecuX.
 
 :::danger important
 
-If you put a gas limit of 50,000 for a simple ETH transfer, the EVM would consume 21,000, and you would get back the remaining 29,000. However, if you specify too little gas, for example, a gas limit of 20,000 for a simple ETH transfer, the EVM will consume your 20,000 gas units attempting to fulfill the transaction, but it will not complete. The EVM then reverts any changes, but since the miner has already done 20k gas units worth of work, that gas is consumed.
+If you put a gas limit of 50,000 for a simple ETH transfer, the EVM would consume 21,000, and you would get back the remaining 29,000. However, if you specify too little gas, for example, a gas limit of 20,000 for a simple ETH transfer, the EVM will consume your 20,000 gas units attempting to fulfill the transaction, but it will not complete. The EVM then **reverts any changes**, but since the miner has already done 20k gas units worth of work, that **gas is consumed**.
 
 :::
 

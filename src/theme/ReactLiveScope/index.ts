@@ -8,9 +8,12 @@
 import React from 'react';
 import * as components from './components';
 import { Buffer } from "buffer";
+import randomBytes from "randombytes";
 import { ITransport } from "@secux/transport";
 import { SecuxWebUSB } from "@secux/transport-webusb";
 import { SecuxWebBLE } from "@secux/transport-webble";
+import { SecuxTransactionTool } from "@secux/protocol-transaction";
+import * as protocolInterface from "@secux/protocol-transaction/lib/interface";
 import * as btcLib from "@secux/app-btc";
 import mempoolJS from "@mempool/mempool.js";
 import * as ethLib from "@secux/app-eth";
@@ -23,6 +26,8 @@ import * as xrpLib from "@secux/app-xrp";
 import * as xrpl from "xrpl";
 import * as trxLib from "@secux/app-trx";
 const TronWeb = require("tronweb");
+import * as xlmLib from "@secux/app-xlm";
+import * as StellarSDK from "stellar-sdk";
 
 
 // Add react-live imports you need here
@@ -31,9 +36,12 @@ const ReactLiveScope = {
     ...React,
     ...components,
     Buffer,
+    randomBytes,
     ITransport,
     SecuxWebUSB,
     SecuxWebBLE,
+    SecuxTransactionTool,
+    ...protocolInterface,
     ...btcLib,
     mempoolJS,
     ...ethLib,
@@ -45,7 +53,9 @@ const ReactLiveScope = {
     ...xrpLib,
     xrpl,
     ...trxLib,
-    TronWeb
+    TronWeb,
+    ...xlmLib,
+    StellarSDK
 };
 
 export default ReactLiveScope;
