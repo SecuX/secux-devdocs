@@ -1,0 +1,106 @@
+---
+title: Ripple (XRP)
+---
+
+This article explains how to use SecuX to trade on Ripple.
+
+## Installation
+```bash npm
+npm install @secux/app-xrp
+```
+
+## Examples
+The following examples will be demonstrated using usb.
+```jsx
+import { SecuxWebUSB } from "@secux/transport-webusb";
+import { SecuxXRP } from "@secux/app-xrp";
+
+export async function useSecuX(callback) {
+  const device = await SecuxWebUSB.Create();
+  await device.Connect();
+
+  await callback(device);
+
+  await device.Disconnect();
+}
+```
+
+<BrowserWindow>
+
+### Generate Address
+The following example is a React playground. Try modifying the BIP-32 path `m/44'/144'/0'/0/0` and play with it!
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxXRP } from "@secux/app-xrp";
+
+function Example(props) {
+  const [address, setAddress] = useState('');
+
+  async function GenerateAddress(device) {
+    // Modify BIP-32 path to play.
+    const path = "m/44'/144'/0'/0/0";
+    const buffer = SecuxXRP.prepareAddress(path);
+    const response = await device.Exchange(buffer);
+    const address = SecuxXRP.resolveAddress(response, path);
+
+    setAddress(address);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(GenerateAddress)}/>
+      <h2>{address}</h2>
+    </div>
+  );
+}
+```
+
+### Make Transaction
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxXRP } from "@secux/app-xrp";
+// import * as xrpl from "xrpl";
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {
+    const path = "m/44'/144'/0'/0/0";
+    const publickey = await device.getPublickey(path);
+
+    // fetch data from ripple api
+    const api = new xrpl.BroadcastClient(["ws://s1.ripple.com"]);
+    await api.connect();
+
+    let payment = {
+      TransactionType: "Payment",
+      Account: SecuxXRP.addressConvert(publickey),
+      Destination: "<Receiving Address>",
+      Amount: 1e6
+    };
+    payment = await api.autofill(payment);
+
+    // signing by SecuX
+    const { commandData, serialized } = SecuxXRP.prepareSign(
+      path,
+      {
+        ...payment,
+        SigningPubKey: publickey
+      }
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxXRP.resolveTransaction(response, serialized);
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
+
+</BrowserWindow>

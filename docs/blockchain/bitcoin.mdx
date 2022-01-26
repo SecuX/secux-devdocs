@@ -1,0 +1,175 @@
+---
+title: Bitcoin (BTC)
+sidebar_position: 1
+---
+
+This article explains how to use SecuX to trade on Bitcoin.
+
+## Installation
+```bash npm
+npm install @secux/app-btc
+```
+
+:::info
+
+The package also support Bitcoin Cash (BCH), Dash (DASH), DigiByte (DGB), Dogecoin (DOGE), Groestlcoin (GRS), Litecoin (LTC).
+
+:::
+
+## Supported Transaction
+The following transaction types are supported on SecuX.
+
+### Pay-to-Pubkey Hash (P2PKH)
+Transactions that pay to a Bitcoin address contain P2PKH scripts that are resolved by sending the public key and a digital signature created by the corresponding private key.
+
+The purpose of [BIP-32](https://github.com/Bitcoin/bips/blob/master/bip-0044.mediawiki) path is `44` here.
+
+> Available Bitcoin networks: BCH, DASH, DGB, DOGE, GRS, LTC.
+
+### Pay-to-Script Hash (P2SH)
+P2SH transactions were standardised in [BIP-16](https://github.com/Bitcoin/bips/blob/master/bip-0016.mediawiki) and introduced by Gavin Andresen, and it resulted in a new standard transaction type for the Bitcoin scripting system. 
+
+The purpose of BIP-32 path is `49` here.
+
+> Available Bitcoin networks: BCH, DGB, GRS, LTC.
+
+### Pay-to-Witness-Pubkey-Hash (P2WPKH)
+A P2WPKH transaction is similar to a P2PKH transaction in most ways; it still locks Bitcoin to the hash of a public key. The major difference is that P2WPKH uses [SegWit](https://github.com/Bitcoin/bips/blob/master/bip-0141.mediawiki).
+
+The purpose of BIP-32 path is `84` here.
+
+### Pay-to-TapRoot (P2TR)
+A [P2TR](https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki) transaction allowing the owner or owners to choose how they would like to spend their money. This makes P2TR a significant improvement for the privacy of users.
+
+The purpose of BIP-32 path is `86` here.
+
+:::info
+
+The cointype of BIP-32 path is `0` for Bitcoin, 145 (BCH), 5 (DASH), 20 (DGB), 3 (DOGE), 17 (GRS), 2 (LTC).
+
+:::
+
+## Examples
+The following examples will be demonstrated using usb.
+```jsx
+import { SecuxWebUSB } from "@secux/transport-webusb";
+import { SecuxBTC } from "@secux/app-btc";
+
+export async function useSecuX(callback) {
+  const device = await SecuxWebUSB.Create();
+  await device.Connect();
+
+  await callback(device);
+
+  await device.Disconnect();
+}
+```
+
+<BrowserWindow>
+
+### Generate Address
+The following example is a React playground. Try modifying the BIP-32 path `m/84'/1'/0'/0/0` and play with it!
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxBTC, CoinType, ScriptType } from "@secux/app-btc";
+
+function Example(props) {
+  const [address, setAddress] = useState('');
+
+  async function GenerateAddress(device) {
+    // Modify BIP-32 path to play.
+    const path = "m/84'/1'/0'/0/0";
+    const buffer = SecuxBTC.prepareAddress(path);
+    const response = await device.Exchange(buffer);
+    const address = SecuxBTC.resolveAddress(response, path);
+
+    setAddress(address);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(GenerateAddress)}/>
+      <h2>{address}</h2>
+    </div>
+  );
+}
+```
+
+### Make Transaction
+The following example is a React playground. Try modifying `<Receiving Address>` and play with it!
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxBTC, CoinType, ScriptType } from "@secux/app-btc";
+// import mempoolJS from "@mempool/mempool.js";
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {
+    // API https://mempool.space/testnet/docs/api/rest
+    const { bitcoin: { addresses, fees, transactions } } = mempoolJS({
+      hostname: "mempool.space",
+      network: "testnet"
+    });
+    const fee = await fees.getFeesRecommended();
+
+    // fetch UTXOs
+    let inputs = [];
+    const paths = ["m/44'/1'/0'/1/0", "m/44'/1'/0'/1/1", "m/49'/1'/0'/1/0"];
+    for (const path of paths) {
+      const publickey = await device.getPublickey(path);
+      const address = SecuxBTC.addressConvert(publickey, path);
+      const utxo = await addresses.getAddressTxsUtxo({ address });
+
+      for (const unspent of utxo) {
+        inputs.push({
+          hash: unspent.txid,
+          vout: unspent.vout,
+          satoshis: unspent.value,
+          path,
+          publickey 
+        });
+      }
+    }
+
+    // signing by SecuX
+    const { commandData, rawTx } = SecuxBTC.prepareSign(
+      inputs,
+      {
+        to: {
+          address: "<Receiving Address>",
+          satoshis: 1e4
+        },
+        utxo: {
+          path: "m/84'/1'/0'/1/0",
+          satoshis: 1,
+          publickey: await device.getPublickey("m/84'/1'/0'/1/0")
+        }
+      },
+      {
+        // If you specify a feeRate, the transaction fee will be optimized.
+        // The fee premium will be contributed to receiver,
+        // or your change account if you specify utxo.
+        feeRate: fee.fastestFee
+      }
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxBTC.resolveTransaction(
+      response, 
+      rawTx, 
+      inputs.map(txIn => txIn.publickey)
+    );
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
+
+</BrowserWindow>

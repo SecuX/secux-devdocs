@@ -1,0 +1,96 @@
+---
+title: Binance (BNB)
+---
+
+This article explains how to use SecuX to trade on Binance chain.
+
+## Installation
+```bash npm
+npm install @secux/app-bnb
+```
+
+## Examples
+The following examples will be demonstrated using usb.
+```jsx
+import { SecuxWebUSB } from "@secux/transport-webusb";
+import { SecuxBNB } from "@secux/app-bnb";
+
+export async function useSecuX(callback) {
+  const device = await SecuxWebUSB.Create();
+  await device.Connect();
+
+  await callback(device);
+
+  await device.Disconnect();
+}
+```
+
+<BrowserWindow>
+
+### Generate Address
+The following example is a React playground. Try modifying the BIP-32 path `m/44'/714'/0'/0/0` and play with it!
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxBNB } from "@secux/app-bnb";
+
+function Example(props) {
+  const [address, setAddress] = useState('');
+
+  async function GenerateAddress(device) {
+    // Modify BIP-32 path to play.
+    const path = "m/44'/714'/0'/0/0";
+    const buffer = SecuxBNB.prepareAddress(path);
+    const response = await device.Exchange(buffer);
+    const address = SecuxBNB.resolveAddress(response, path);
+
+    setAddress(address);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(GenerateAddress)}/>
+      <h2>{address}</h2>
+    </div>
+  );
+}
+```
+
+### Make Transaction
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxBNB } from "@secux/app-bnb";
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {
+    const path = "m/44'/714'/0'/0/0";
+    const publickey = await device.getPublickey(path);
+    const { commandData, serialized } = SecuxBNB.prepareSign(
+      path,
+      {
+        publickey,
+        to: "<Receiving Address>",
+        amount: 1e8,
+        // chainId: "Binance-Chain-Tigris",
+        // accountNumber: 0,
+        // sequence: 0,
+        // memo: "",
+      }
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxBNB.resolveTransaction(response, serialized);
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
+
+</BrowserWindow>

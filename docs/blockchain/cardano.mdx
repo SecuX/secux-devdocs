@@ -1,0 +1,341 @@
+---
+title: Cardano (ADA)
+---
+
+This article explains how to use SecuX to trade on Cardano.
+
+## Installation
+```bash npm
+npm install @secux/app-ada
+```
+
+## Examples
+The following examples will be demonstrated using usb.
+```jsx
+import { SecuxWebUSB } from "@secux/transport-webusb";
+import { SecuxADA } from "@secux/app-ada";
+
+export async function useSecuX(callback) {
+  const device = await SecuxWebUSB.Create();
+  await device.Connect();
+
+  await callback(device);
+
+  await device.Disconnect();
+}
+```
+
+<BrowserWindow>
+
+### Generate Base Address
+The following example is a React playground. Try modifying the BIP-32 path `m/1852'/1815'/0'` and play with it!
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxADA, AddressType } from "@secux/app-ada";
+
+function Example(props) {
+  const [address, setAddress] = useState('');
+
+  async function GenerateAddress(device) {
+    // Modify BIP-32 path to play.
+    const path = "m/1852'/1815'/0'";
+    const buffer = SecuxADA.prepareAddress(path);
+    const response = await device.Exchange(buffer);
+    const address = SecuxADA.resolveAddress(
+      response, 
+      AddressType.BASE, 
+      { 
+        addressIndex: 0,
+        stakeIndex: 0
+      }
+    );
+
+    setAddress(address);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(GenerateAddress)}/>
+      <h2>{address}</h2>
+    </div>
+  );
+}
+```
+
+### Generate Reward Address
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxADA, AddressType } from "@secux/app-ada";
+
+function Example(props) {
+  const [address, setAddress] = useState('');
+
+  async function GenerateAddress(device) {
+    // Modify BIP-32 path to play.
+    const path = "m/1852'/1815'/0'";
+    const buffer = SecuxADA.prepareAddress(path);
+    const response = await device.Exchange(buffer);
+    const address = SecuxADA.resolveAddress(
+      response, 
+      AddressType.REWARD, 
+      { 
+        stakeIndex: 0
+      }
+    );
+
+    setAddress(address);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(GenerateAddress)}/>
+      <h2>{address}</h2>
+    </div>
+  );
+}
+```
+
+### Transfer Asset
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxADA, AddressType } from "@secux/app-ada";
+// import { blockfrostWalletProvider } from "@cardano-sdk/blockfrost";
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {
+    const path = "m/1852'/1815'/0'";
+    const xpublickey = await device.getXPublickey(path);
+    const fromAddress = SecuxADA.addressConvert(
+      xpublickey, 
+      AddressType.BASE
+    );
+
+    // fetch data from cardano api
+    const api = blockfrostWalletProvider({ projectId: "<api key>" });
+    const utxos = await api.queryTransactionsByAddresses([ fromAddress ]);
+
+    const inputs = utxos.map(({ id, body }) => {
+      const unspent = body.outputs.find(output => output.address === fromAddress);
+
+      return {
+        path,
+        txId: id,
+        index: body.outputs.indexOf(unspent),
+        amount: unspent.value.coins.toString(),
+        xpublickey
+      }
+    });
+
+    // signing by SecuX
+    const { commandData, serialized } = SecuxADA.prepareSign(
+      inputs,
+      {
+        address: "<Receiving Address>",
+        amount: 1e6
+      },
+      {
+        changeAddress: fromAddress,
+        // or determine transaction fee you want to consume
+        // fee: 2e5
+      }
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxADA.resolveTransaction(response, serialized);
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
+
+### Stake to a pool
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxADA, AddressType } from "@secux/app-ada";
+// import { blockfrostWalletProvider } from "@cardano-sdk/blockfrost";
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {
+    const path = "m/1852'/1815'/0'";
+    const xpublickey = await device.getXPublickey(path);
+    const fromAddress = SecuxADA.addressConvert(
+      xpublickey, 
+      AddressType.BASE
+    );
+
+    // fetch data from cardano api
+    const api = blockfrostWalletProvider({ projectId: "<api key>" });
+    const utxos = await api.queryTransactionsByAddresses([ fromAddress ]);
+
+    const inputs = utxos.map(({ id, body }) => {
+      const unspent = body.outputs.find(output => output.address === fromAddress);
+
+      return {
+        txId: id,
+        index: body.outputs.indexOf(unspent),
+        amount: unspent.value.coins.toString(),
+      }
+    });
+
+    // signing by SecuX
+    const { commandData, serialized } = SecuxADA.prepareStake(
+      {
+        path,
+        utxo: inputs,
+        changeAddress: fromAddress,
+        xpublickey
+      },
+      "<Pool Hash>",
+      {
+        needRegistration: true
+      }
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxADA.resolveTransaction(response, serialized);
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
+
+### Withdraw Reward
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxADA, AddressType } from "@secux/app-ada";
+// import { blockfrostWalletProvider } from "@cardano-sdk/blockfrost";
+// import { Cardano } from "@cardano-sdk/core";
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {
+    const path = "m/1852'/1815'/0'";
+    const xpublickey = await device.getXPublickey(path);
+    const fromAddress = SecuxADA.addressConvert(
+      xpublickey, 
+      AddressType.BASE
+    );
+    const rewardAddress = SecuxADA.addressConvert(
+      xpublickey, 
+      AddressType.REWARD
+    );
+
+    // fetch data from cardano api
+    const api = blockfrostWalletProvider({ projectId: "<api key>" });
+    const accountInfo = await api.utxoDelegationAndRewards(
+      [ fromAddress ], 
+      Cardano.RewardAccount(rewardAddress)
+    );
+
+    const utxo = {
+      txId: accountInfo.utxo[0][0].txId,
+      index: accountInfo.utxo[0][0].index,
+      amount: accountInfo.utxo[0][1].value.coins.toString()
+    };
+
+    // signing by SecuX
+    const { commandData, serialized } = SecuxADA.prepareWithdraw(
+      {
+        path,
+        utxo,
+        changeAddress: fromAddress,
+        xpublickey
+      },
+      accountInfo.delegationAndRewards.rewards.toString()
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxADA.resolveTransaction(response, serialized);
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
+
+### Unstake (withdrawal and de-registration)
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxADA, AddressType } from "@secux/app-ada";
+// import { blockfrostWalletProvider } from "@cardano-sdk/blockfrost";
+// import { Cardano } from "@cardano-sdk/core";
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {
+    const path = "m/1852'/1815'/0'";
+    const xpublickey = await device.getXPublickey(path);
+    const fromAddress = SecuxADA.addressConvert(
+      xpublickey, 
+      AddressType.BASE
+    );
+    const rewardAddress = SecuxADA.addressConvert(
+      xpublickey, 
+      AddressType.REWARD
+    );
+
+    // fetch data from cardano api
+    const api = blockfrostWalletProvider({ projectId: "<api key>" });
+    const accountInfo = await api.utxoDelegationAndRewards(
+      [ fromAddress ], 
+      Cardano.RewardAccount(rewardAddress)
+    );
+
+    const utxo = {
+      txId: accountInfo.utxo[0][0].txId,
+      index: accountInfo.utxo[0][0].index,
+      amount: accountInfo.utxo[0][1].value.coins.toString()
+    };
+
+    // signing by SecuX
+    const { commandData, serialized } = SecuxADA.prepareUnstake(
+      {
+        path,
+        utxo,
+        changeAddress: fromAddress,
+        xpublickey
+      },
+      {
+        // if reward greater than 0, you need to do withdrawal
+        withdrawAmount: accountInfo.delegationAndRewards.rewards.toString()
+      }
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxADA.resolveTransaction(response, serialized);
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
+
+</BrowserWindow>

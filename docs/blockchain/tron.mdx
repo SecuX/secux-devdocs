@@ -1,0 +1,200 @@
+---
+title: Tron (TRX)
+---
+
+This article explains how to use SecuX to trade on Tron.
+
+## Installation
+```bash npm
+npm install @secux/app-trx
+```
+
+## Supported standards
+### TRC-10
+TRC-10 is a technical token standard supported by the TRON blockchain natively without the TRON Virtual Machine (TVM).
+Every account is capable of issuing tokens at the expense of 1024 TRX.
+
+### TRC-20
+TRC-20 is a technical standard used for smart contracts on the TRON blockchain for implementing tokens with the TRON Virtual Machine (TVM). It is fully compatible with ERC-20.
+
+## Examples
+The following examples will be demonstrated using usb.
+```jsx
+import { SecuxWebUSB } from "@secux/transport-webusb";
+import { SecuxTRX } from "@secux/app-trx";
+
+export async function useSecuX(callback) {
+  const device = await SecuxWebUSB.Create();
+  await device.Connect();
+
+  await callback(device);
+
+  await device.Disconnect();
+}
+```
+
+<BrowserWindow>
+
+### Generate Address
+The following example is a React playground. Try modifying the BIP-32 path `m/44'/195'/0'/0/0` and play with it!
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxTRX } from "@secux/app-trx";
+
+function Example(props) {
+  const [address, setAddress] = useState('');
+
+  async function GenerateAddress(device) {
+    // Modify BIP-32 path to play.
+    const path = "m/44'/195'/0'/0/0";
+    const buffer = SecuxTRX.prepareAddress(path);
+    const response = await device.Exchange(buffer);
+    const address = SecuxTRX.resolveAddress(response, path);
+
+    setAddress(address);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(GenerateAddress)}/>
+      <h2>{address}</h2>
+    </div>
+  );
+}
+```
+
+### Transfer Asset
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxTRX } from "@secux/app-trx";
+// const TronWeb = require("tronweb");
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {
+    const path = "m/44'/195'/0'/0/0";
+    const fromAddress = await device.getAddress(path);
+
+    // fetch data from tron api
+    const api = new TronWeb({ fullHost: 'https://api.trongrid.io' });
+    const block = await api.trx.getConfirmedCurrentBlock();
+
+    // signing by SecuX
+    const { commandData, rawTx } = SecuxTRX.prepareSign(
+      path,
+      {
+        from: fromAddress,
+        to: "<Receiving Address>",
+        amount: 1e6,
+        blockID: block.blockID,
+        blockNumber: block.block_header.raw_data.number,
+        timestamp: Date.now()
+      }
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxTRX.resolveTransaction(response, rawTx);
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
+
+### Transfer TRC-10 Token
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxTRX } from "@secux/app-trx";
+// const TronWeb = require("tronweb");
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {
+    const path = "m/44'/195'/0'/0/0";
+    const fromAddress = await device.getAddress(path);
+
+    // fetch data from tron api
+    const api = new TronWeb({ fullHost: 'https://api.trongrid.io' });
+    const block = await api.trx.getConfirmedCurrentBlock();
+
+    // signing by SecuX
+    const { commandData, rawTx } = SecuxTRX.prepareSign(
+      path,
+      {
+        from: fromAddress,
+        to: "<Receiving Address>",
+        token: "<Token Id>",
+        amount: 1e6,
+        blockID: block.blockID,
+        blockNumber: block.block_header.raw_data.number,
+        timestamp: Date.now()
+      }
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxTRX.resolveTransaction(response, rawTx);
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
+
+### Transfer TRC-20 Token
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxTRX } from "@secux/app-trx";
+// const TronWeb = require("tronweb");
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {
+    const path = "m/44'/195'/0'/0/0";
+    const fromAddress = await device.getAddress(path);
+
+    // fetch data from tron api
+    const api = new TronWeb({ fullHost: 'https://api.trongrid.io' });
+    const block = await api.trx.getConfirmedCurrentBlock();
+
+    // signing by SecuX
+    const { commandData, rawTx } = SecuxTRX.prepareSign(
+      path,
+      {
+        from: fromAddress,
+        to: "<Receiving Address>",
+        contract: "<Contract Address>",
+        amount: 1e6,
+        blockID: block.blockID,
+        blockNumber: block.block_header.raw_data.number,
+        timestamp: Date.now()
+      }
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxTRX.resolveTransaction(response, rawTx);
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
+
+</BrowserWindow>

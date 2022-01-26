@@ -1,0 +1,276 @@
+---
+sidebar_position: 3
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# React Native Bluetooth
+
+A React Native application can connect to SecuX via Bluetooth.
+
+## Requirements
+- [Node.js](https://nodejs.org/en/download/) version >= `14` or above (which can be checked by running `node -v`). You can use nvm for managing multiple Node versions on a single machine installed.
+- [React-Native](https://reactnative.dev/docs/environment-setup) version >= `0.60.6` or above (which can be checked by running `npx react-native -v`).
+
+:::caution notice
+
+For Android, location services should be turned on when scanning devices.
+
+:::
+
+## Installation
+```bash npm
+npm install @secux/transport-reactnative react-native-ble-plx react-native-settings
+```
+
+## Environment Setup
+Before doing the following instruction, please confirm that your [development environment](https://reactnative.dev/docs/environment-setup) has been set up.
+
+<Tabs>
+<TabItem value="Android" default>
+
+1. Open `<YourProject>/android/build.gradle`, and make sure that min SDK version is `18` or above.
+```groovy
+buildscript {
+    ext {
+        ...
+        // highlight-next-line
+        minSdkVersion = 18
+        ...
+```
+2. In `build.gradle`, make sure to add `jitpack` repository to known repositories.
+```groovy
+allprojects {
+    repositories {
+      ...
+      // highlight-next-line
+      maven { url 'https://www.jitpack.io' }
+    }
+}
+```
+3. In `build.gradle`, make sure that gradle version is `4.1.0` or above.
+```groovy
+buildscript {
+    dependencies {
+        // highlight-next-line
+        classpath("com.android.tools.build:gradle:4.1.0")
+        ...
+```
+4. Add the following permissions to `<YourProject>/android/app/src/main/AndroidManifest.xml`.
+```xml
+<uses-permission android:name="android.permission.BLUETOOTH"/>
+<uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+<uses-feature android:name="android.hardware.bluetooth_le" android:required="true"/>
+```
+
+</TabItem>
+<TabItem value="iOS">
+
+1. In `<YourProject>/ios` folder, run the following command in a Terminal.
+```bash sh
+pod update
+```
+2. Add the following desciption to `<YourProject>/ios/<AppName>/info.plist` file. (it is a requirement since iOS 13)
+```xml
+<key>NSBluetoothAlwaysUsageDescription</key>
+<string>Our app uses bluetooth to find, connect and transfer data between different devices</string>
+```
+
+</TabItem>
+</Tabs>
+
+## Scanning SecuX
+This custom Hook will scan all nearby SecuX.
+```jsx title="ScanHook.js"
+import { useState, useEffect } from "react";
+import { SecuxReactNativeBLE } from "@secux/transport-reactnative";
+
+export function useScan() {
+  const [scanning, SetScanning] = useState(false);
+  const [deviceList, SetDeviceList] = useState([]);
+
+  useEffect(() => {
+    // Code block here is equivalent to lifecycle method `componentDidMount`.
+    SecuxReactNativeBLE.StartScan(
+      // New SecuX not in list.
+      (newSecuX) => SetDeviceList(devices => [...devices, newSecuX]), 
+
+      /*
+      // The following code is optional feature.
+      // Remove SecuX that cannot be connected now. 
+      (secux) => SetDevices(
+        devices => devices.filter(device => device.id !== secux.id)
+      ),
+
+      // Set time interval(ms) for keeping SecuX in list.
+      2000
+      */
+    );
+    SetScanning(true);
+
+    // Code block here is equivalent to lifecycle method `componentWillUnmount`.
+    return () => {
+      SecuxReactNativeBLE.StopScan();
+      SetScanning(false);
+      SetDeviceList([]);
+    }
+  }, []);
+
+  return { scanning, deviceList };
+}
+```
+
+## Connect to your SecuX
+This custom Hook will connect to your SecuX.
+```jsx title="ConnectHook.js"
+import { useState, useEffect } from "react";
+import { SecuxReactNativeBLE } from "@secux/transport-reactnative";
+
+export function useSecuX(deviceId) {
+  const [device, SetDevice] = useState();
+
+  useEffect(async () => {
+    const device = await SecuxReactNativeBLE.Create(
+      deviceId,
+      () => console.log("connected"),
+      () => console.log("disconnected")
+    );
+    SetDevice(device);
+
+    await device.Connect();
+
+    // Need to call SendOTP() to finish the otp authentication.
+    // You must replace otp code "123456" that showing on SecuX.
+    const isAuthenticated = await device.SendOTP("123456");
+  }, []);
+
+  return { device };
+}
+```
+
+## Example
+This application will connect to your SecuX to display the address of your account.
+
+```jsx title="App.js"
+import React, { useState } from 'react';
+import {
+  Button, StyleSheet, Modal, View, Text, TextInput, Dimensions, FlatList, Alert
+} from "react-native";
+import { SecuxReactNativeBLE } from "@secux/transport-reactnative";
+require("@secux/app-btc");
+import { useScan } from "./ScanHook";
+
+const { width } = Dimensions.get("window");
+
+export default function App() {
+  const [showDialog, SetShowDialog] = useState(false);
+  const [otp, SetOTP] = React.useState();
+  const [device, SetDevice] = React.useState();
+  const { scanning, deviceList } = useScan();
+
+
+  async function Connect(deviceId) {
+    const device = await SecuxReactNativeBLE.Create(
+      deviceId,
+      () => console.log("connected"),
+      () => console.log("disconnected")
+    );
+    SetDevice(device);
+
+    await device.Connect();
+
+    SetShowDialog(true);
+  };
+
+  async function FinishOTP() {
+    const isAuthenticated = await device.SendOTP(otp);
+    if (isAuthenticated) SetShowDialog(false);
+
+    // query Bitcoin address (native segwit)
+    const btcAccount = await device.getAddress("m/84'/0'/0'/0/0");
+    Alert.alert("Bitcoin Address", btcAccount);
+  }
+
+  function renderListItem(item) {
+    return (
+      <Button
+        style={styles.item}
+        title={item.name}
+        disabled={item.clicked}
+        onPress={async () => {
+          item.clicked = true;
+          await Connect(item.id);
+        }} />
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      <View style={{ alignItems: "center" }}>
+        <Text>SecuX Example Project</Text>
+        <FlatList 
+          data={deviceList} 
+          renderItem={({ item }) => renderListItem(item)} />
+      </View>
+
+      <Modal animationType="slide"
+        transparent visible={showDialog}
+        presentationStyle="overFullScreen"
+        onDismiss={() => SetShowDialog(false)}>
+        <View style={styles.viewWrapper}>
+          <View style={styles.modalView}>
+            <TextInput placeholder="Enter otp"
+              value={otp} style={styles.textInput}
+              onChangeText={(value) => SetOTP(value)} />
+
+            <Button title="Close" onPress={FinishOTP} />
+          </View>
+        </View>
+      </Modal>
+    </View >
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingTop: 22
+  },
+  item: {
+    padding: 10,
+    fontSize: 18,
+    height: 44,
+  },
+  viewWrapper: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.2)",
+  },
+  modalView: {
+    alignItems: "center",
+    justifyContent: "center",
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    elevation: 5,
+    transform: [{ translateX: -(width * 0.4) },
+    { translateY: -90 }],
+    height: 180,
+    width: width * 0.8,
+    backgroundColor: "#fff",
+    borderRadius: 7,
+  },
+  textInput: {
+    width: "80%",
+    borderRadius: 5,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderColor: "rgba(0, 0, 0, 0.2)",
+    borderWidth: 1,
+    marginBottom: 8,
+  },
+});
+```

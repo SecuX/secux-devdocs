@@ -1,0 +1,101 @@
+---
+sidebar_position: 2
+---
+
+# Web Bluetooth
+
+A web application can connect to SecuX via Bluetooth.
+
+## Requirements
+- [Node.js](https://nodejs.org/en/download/) version >= `14` or above (which can be checked by running `node -v`). You can use nvm for managing multiple Node versions on a single machine installed.
+
+:::caution notice
+
+Web application need to polyfill Node.js core modules. ex: [node-polyfill-webpack-plugin](https://www.npmjs.com/package/node-polyfill-webpack-plugin)
+
+:::
+
+
+## Installation
+```bash npm
+npm install @secux/transport-webble
+```
+
+## Example
+In this example, you need to install bitcoin package.
+```bash npm
+npm install @secux/app-btc@3.0.0
+```
+
+This application will connect to your SecuX to display the address of your account.
+```js
+import { SecuxWebBLE } from "@secux/transport-webble";
+require("@secux/app-btc");
+
+// highlight-start
+const device = await SecuxWebBLE.Create(
+  () => alert("connected"),
+  () => alert("disconnected")
+);
+
+await device.Connect();
+
+const otp = prompt("Please enter otp showing on your SecuX");
+await device.SendOTP(otp);
+// highlight-end
+
+// query Bitcoin address (native segwit)
+const btcAccount = await device.getAddress("m/84'/0'/0'/0/0");
+setAddress(btcAccount);
+
+await device.Disconnect();
+```
+
+<BrowserWindow>
+
+## Live Demo
+The following example is a React playground. Try modifying the BIP-32 path `m/84'/0'/0'/0/0` and play with it!
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import React from "react";
+// import { SecuxWebBLE } from "@secux/transport-webble";
+// require("@secux/app-btc");
+
+function Example(props) {
+  const [address, setAddress] = useState('');
+
+  async function Connect() {
+    const device = await SecuxWebBLE.Create(
+      () => alert("connected"),
+      () => alert("disconnected")
+    );
+
+    await device.Connect();
+
+    const otp = prompt("Please enter otp showing on your SecuX");
+    await device.SendOTP(otp);
+
+    // query Bitcoin address (native segwit)
+    const btcAccount = await device.getAddress("m/84'/0'/0'/0/0");
+    setAddress(btcAccount);
+
+    await device.Disconnect();
+  }
+
+  return (
+    <div>
+      <Button onClick={Connect}/>
+      <h2>{address}</h2>
+    </div>
+  );
+}
+```
+
+</BrowserWindow>
+
+
+:::info
+
+Some browser globally disable Web Bluetooth API, please use Chrome instead.
+
+:::

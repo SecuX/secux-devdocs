@@ -1,0 +1,495 @@
+---
+title: Ethereum (ETH)
+sidebar_position: 2
+---
+
+This article explains how to use SecuX to trade on Ethereum.
+
+## Installation
+```bash npm
+npm install @secux/app-eth
+```
+
+## Supported items
+### Transaction Type
+The following transaction types are supported on SecuX.
+- legacy: Before EIP-155, there are 6 inputs to an Ethereum transaction.
+  - nonce: the number of transactions sent from this address
+  - gasPrice: the price of gas (unit: wei)
+  - gasLimit: the maximum amount of gas you are willing to consume
+  - to: recipient of this transaction
+  - value: the number of ethers need to pay
+  - data: abi-encoded data payload that is accepted by [EVM](https://ethereum.org/en/developers/docs/evm/)
+- [EIP-155](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-155.md): EIP-155 aims to fix the simple replay attack issue in a more general way by including a `chainId` in the transaction.
+- [EIP-1559](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1559.md): A transaction pricing mechanism that includes fixed-per-block network fee that is burned and dynamically expands/contracts block sizes to deal with transient congestion.
+
+:::danger important
+
+If you put a gas limit of 50,000 for a simple ETH transfer, the EVM would consume 21,000, and you would get back the remaining 29,000. However, if you specify too little gas, for example, a gas limit of 20,000 for a simple ETH transfer, the EVM will consume your 20,000 gas units attempting to fulfill the transaction, but it will not complete. The EVM then reverts any changes, but since the miner has already done 20k gas units worth of work, that gas is consumed.
+
+:::
+
+### Layer 2
+Users can use the information to connect their wallets and Web3 middleware providers to the appropriate Chain ID and Network ID to connect to [the correct chain](https://chainlist.org/).
+
+The following Ethereum layer 2 networks are supported on SecuX, the Network ID and Chain ID is:
+- Binance Smart Chain Mainnet (BSC): 56
+- Polygon Mainnet (MATIC): 137
+
+### Ethereum Improvement Proposals
+EIPs describe standards for the Ethereum platform, including core protocol specifications, client APIs, and contract standards. 
+Common ERC standards define a required set of functions for a token type, allowing applications and smart contracts to interact with them in a predictable way.
+
+The following ERC starndards are supported on SecuX:
+- [ERC-20](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md) TOKEN STANDARD (transfer, transferFrom)
+- [ERC-721](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md) Non-Fungible Token Standard (transferFrom, safeTransferFrom)
+- [EIP-712](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md) Ethereum typed structured data hashing and signing
+
+## Examples
+The following examples will be demonstrated using usb.
+```jsx
+import { SecuxWebUSB } from "@secux/transport-webusb";
+import { SecuxETH } from "@secux/app-eth";
+
+export async function useSecuX(callback) {
+  const device = await SecuxWebUSB.Create();
+  await device.Connect();
+
+  await callback(device);
+
+  await device.Disconnect();
+}
+```
+
+<BrowserWindow>
+
+### Generate Address
+The following example is a React playground. Try modifying the BIP-32 path `m/44'/60'/0'/0/0` and play with it!
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxETH } from "@secux/app-eth";
+
+function Example(props) {
+  const [address, setAddress] = useState('');
+
+  async function GenerateAddress(device) {
+    // Modify BIP-32 path to play.
+    const path = "m/44'/60'/0'/0/0";
+    const buffer = SecuxETH.prepareAddress(path);
+    const response = await device.Exchange(buffer);
+    const address = SecuxETH.resolveAddress(response, path);
+
+    setAddress(address);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(GenerateAddress)}/>
+      <h2>{address}</h2>
+    </div>
+  );
+}
+```
+
+### Transfer Asset (EIP-1559)
+Here is a demonstration of how to transfer Ether to others, you can also trigger a smart contract by giving a value to the `data` field.
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxETH } from "@secux/app-eth";
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {
+    const web3 = new Web3(
+      new Web3.providers.HttpProvider("https://ropsten.infura.io/v3/<api key>")
+    );
+    
+    const path = "m/44'/60'/0'/0/0";
+    const fromAddress = await device.getAddress(path);
+
+    const nonce = await web3.eth.getTransactionCount(fromAddress);
+    const feeHistory = await web3.eth.getFeeHistory(1, "latest", [75]);
+    const fees = feeHistory.baseFeePerGas.map(x => parseInt(x.slice(2), 16));
+    const baseFee = Math.floor(fees.reduce((a, b) => a + b, 0) / fees.length) * 1e9;
+    const priorityFee = parseInt(feeHistory.reward[0][0].slice(2), 16);
+
+    // signing by SecuX
+    const { commandData, rawTx } = SecuxETH.prepareSignEIP1559(
+      path,
+      {
+        nonce,
+        to: "<Receiving Address>",
+        value: 1e18,
+        chainId: 3,
+        maxPriorityFeePerGas: priorityFee,
+        maxFeePerGas: (2 * baseFee + priorityFee),
+        gasLimit: 21000,
+        // abi encoded string
+        // data: "0x"
+      }
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxETH.resolveTransaction(response, rawTx);
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
+
+### Transfer ERC-20 Token (EIP-1559)
+The following abi funciton calls are available:
+- SecuxETH.ERC20.prepareTransfer()
+- SecuxETH.ERC20.prepareTransferFrom()
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxETH } from "@secux/app-eth";
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {
+    const web3 = new Web3(
+      new Web3.providers.HttpProvider("https://ropsten.infura.io/v3/<api key>")
+    );
+    
+    const path = "m/44'/60'/0'/0/0";
+    const fromAddress = await device.getAddress(path);
+
+    const nonce = await web3.eth.getTransactionCount(fromAddress);
+    const feeHistory = await web3.eth.getFeeHistory(1, "latest", [75]);
+    const fees = feeHistory.baseFeePerGas.map(x => parseInt(x.slice(2), 16));
+    const baseFee = Math.floor(fees.reduce((a, b) => a + b, 0) / fees.length) * 1e9;
+    const priorityFee = parseInt(feeHistory.reward[0][0].slice(2), 16);
+
+    // signing by SecuX
+    const { commandData, rawTx } = SecuxETH.ERC20.prepareTransferFrom(
+      path,
+      {
+        nonce,
+        to: "<Contract Address>",
+        value: 0,
+        chainId: 3,
+        maxPriorityFeePerGas: priorityFee,
+        maxFeePerGas: (2 * baseFee + priorityFee),
+        gasLimit: 21000,
+      },
+      {
+        fromAddress,
+        toAddress: "<Receiving Address>",
+        amount: `0x${1e18.toString(16)}`
+      }
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxETH.resolveTransaction(response, rawTx);
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
+
+### Transfer ERC-721 Non-Fungible Token (EIP-1559)
+The following abi funciton calls are available:
+- SecuxETH.ERC721.prepareTransferFrom()
+- SecuxETH.ERC721.prepareSafeTransferFrom()
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxETH } from "@secux/app-eth";
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {
+    const web3 = new Web3(
+      new Web3.providers.HttpProvider("https://ropsten.infura.io/v3/<api key>")
+    );
+    
+    const path = "m/44'/60'/0'/0/0";
+    const fromAddress = await device.getAddress(path);
+
+    const nonce = await web3.eth.getTransactionCount(fromAddress);
+    const feeHistory = await web3.eth.getFeeHistory(1, "latest", [75]);
+    const fees = feeHistory.baseFeePerGas.map(x => parseInt(x.slice(2), 16));
+    const baseFee = Math.floor(fees.reduce((a, b) => a + b, 0) / fees.length) * 1e9;
+    const priorityFee = parseInt(feeHistory.reward[0][0].slice(2), 16);
+
+    // signing by SecuX
+    const { commandData, rawTx } = SecuxETH.ERC721.prepareSafeTransferFrom(
+      path,
+      {
+        nonce,
+        to: "<Contract Address>",
+        value: 0,
+        chainId: 3,
+        maxPriorityFeePerGas: priorityFee,
+        maxFeePerGas: (2 * baseFee + priorityFee),
+        gasLimit: 21000,
+      },
+      {
+        fromAddress,
+        toAddress: "<Receiving Address>",
+        tokenId: "<Token Id>"
+      }
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxETH.resolveTransaction(response, rawTx);
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
+
+### Transfer Asset (EIP-155)
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxETH } from "@secux/app-eth";
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {
+    const web3 = new Web3(
+      new Web3.providers.HttpProvider("https://ropsten.infura.io/v3/<api key>")
+    );
+    
+    const path = "m/44'/60'/0'/0/0";
+    const fromAddress = await device.getAddress(path);
+
+    const nonce = await web3.eth.getTransactionCount(fromAddress);
+    const feeHistory = await web3.eth.getFeeHistory(1, "latest", [75]);
+    const fees = feeHistory.baseFeePerGas.map(x => parseInt(x.slice(2), 16));
+    const baseFee = Math.floor(fees.reduce((a, b) => a + b, 0) / fees.length) * 1e9;
+    const priorityFee = parseInt(feeHistory.reward[0][0].slice(2), 16);
+
+    // signing by SecuX
+    const { commandData, rawTx } = SecuxETH.prepareSignEIP155(
+      path,
+      {
+        nonce,
+        to: "<Receiving Address>",
+        value: 1e18,
+        chainId: 3,
+        gasPrice: baseFee + priorityFee,
+        gasLimit: 21000,
+        // abi encoded string
+        // data: "0x"
+      }
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxETH.resolveTransaction(response, rawTx);
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
+
+### Transfer ERC-20 Token (EIP-155)
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxETH } from "@secux/app-eth";
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {
+    const web3 = new Web3(
+      new Web3.providers.HttpProvider("https://ropsten.infura.io/v3/<api key>")
+    );
+    
+    const path = "m/44'/60'/0'/0/0";
+    const fromAddress = await device.getAddress(path);
+
+    const nonce = await web3.eth.getTransactionCount(fromAddress);
+    const feeHistory = await web3.eth.getFeeHistory(1, "latest", [75]);
+    const fees = feeHistory.baseFeePerGas.map(x => parseInt(x.slice(2), 16));
+    const baseFee = Math.floor(fees.reduce((a, b) => a + b, 0) / fees.length) * 1e9;
+    const priorityFee = parseInt(feeHistory.reward[0][0].slice(2), 16);
+
+    // signing by SecuX
+    const { commandData, rawTx } = SecuxETH.ERC20.prepareTransferFrom(
+      path,
+      {
+        nonce,
+        to: "<Contract Address>",
+        value: 0,
+        chainId: 3,
+        gasPrice: baseFee + priorityFee,
+        gasLimit: 21000,
+      },
+      {
+        fromAddress,
+        toAddress: "<Receiving Address>",
+        amount: `0x${1e18.toString(16)}`
+      }
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxETH.resolveTransaction(response, rawTx);
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
+
+### Transfer ERC-721 Non-Fungible Token (EIP-155)
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxETH } from "@secux/app-eth";
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {
+    const web3 = new Web3(
+      new Web3.providers.HttpProvider("https://ropsten.infura.io/v3/<api key>")
+    );
+    
+    const path = "m/44'/60'/0'/0/0";
+    const fromAddress = await device.getAddress(path);
+
+    const nonce = await web3.eth.getTransactionCount(fromAddress);
+    const feeHistory = await web3.eth.getFeeHistory(1, "latest", [75]);
+    const fees = feeHistory.baseFeePerGas.map(x => parseInt(x.slice(2), 16));
+    const baseFee = Math.floor(fees.reduce((a, b) => a + b, 0) / fees.length) * 1e9;
+    const priorityFee = parseInt(feeHistory.reward[0][0].slice(2), 16);
+
+    // signing by SecuX
+    const { commandData, rawTx } = SecuxETH.ERC721.prepareSafeTransferFrom(
+      path,
+      {
+        nonce,
+        to: "<Contract Address>",
+        value: 0,
+        chainId: 3,
+        gasPrice: baseFee + priorityFee,
+        gasLimit: 21000,
+      },
+      {
+        fromAddress,
+        toAddress: "<Receiving Address>",
+        tokenId: "<Token Id>"
+      }
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxETH.resolveTransaction(response, rawTx);
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
+
+### Send Message
+WalletConnect use this method to do the communication, known as [personal_sign](https://docs.walletconnect.com/json-rpc-api-methods/ethereum#personal_sign) or [eth_sign](https://docs.walletconnect.com/json-rpc-api-methods/ethereum#eth_sign).
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxETH } from "@secux/app-eth";
+
+function Example(props) {
+  const [signature, setSignature] = useState('');
+
+  async function MakeTransaction(device) {
+    const path = "m/44'/60'/0'/0/0";
+    const commandData = SecuxETH.prepareSignMessage(
+      path,
+      "<Message>"
+    );
+    const response = await device.Exchange(commandData);
+    const signature = SecuxETH.resolveSignatureEIP155(response);
+
+    setSignature(signature);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{signature}</h2>
+    </div>
+  );
+}
+```
+:::caution notice
+
+If the `message` start with `0x`, it will be considered as a buffer of hex string; 
+otherwise, it will be considered as a UTF8 encoded string. And you can give a buffer explicitly.
+
+:::
+
+:::caution notice
+
+You should not add a prefix to the message.
+
+:::
+
+### Send EIP-712 Typed Data
+WalletConnect use this method to do the communication, known as [eth_signTypedData](https://docs.walletconnect.com/json-rpc-api-methods/ethereum#eth_signtypeddata).
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxETH } from "@secux/app-eth";
+
+function Example(props) {
+  const [signature, setSignature] = useState('');
+
+  async function MakeTransaction(device) {
+    const path = "m/44'/60'/0'/0/0";
+    const commandData = SecuxETH.prepareSignTypedData(
+      path,
+      // must be a JSON string
+      "<Typed Structured Data>"
+    );
+    const response = await device.Exchange(commandData);
+    const signature = SecuxETH.resolveSignatureEIP155(response);
+
+    setSignature(signature);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{signature}</h2>
+    </div>
+  );
+}
+```
+
+</BrowserWindow>
