@@ -3,7 +3,7 @@ const { NormalModuleReplacementPlugin } = require('webpack');
 
 const cardanoPlugin = new NormalModuleReplacementPlugin(
     /@emurgo\/cardano-serialization-lib-nodejs/,
-    '@emurgo/cardano-serialization-lib-browser'
+    '@emurgo/cardano-serialization-lib-asmjs'
 );
 
 // eslint-disable-next-line
