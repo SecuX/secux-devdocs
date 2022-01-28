@@ -5,6 +5,12 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+if (typeof TextEncoder !== 'function') {
+    const TextEncodingPolyfill = require('text-encoding');
+    Object.assign(global, { TextEncoder: TextEncodingPolyfill.TextEncoder });
+    Object.assign(global, { TextDecoder: TextEncodingPolyfill.TextDecoder });
+}
+
 import React from 'react';
 import * as components from './components';
 import { Buffer } from "buffer";
