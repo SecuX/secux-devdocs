@@ -19,6 +19,7 @@
     "@docusaurus/core": "2.0.0-beta.14",
     "@docusaurus/preset-classic": "2.0.0-beta.14",
     "@docusaurus/theme-live-codeblock": "2.0.0-beta.14",
+    "@emurgo/cardano-serialization-lib-asmjs": "^9.1.4",
     "@mdx-js/react": "^1.6.21",
     "@mempool/mempool.js": "^2.3.0",
     "@secux/app-ada": "^3.0.0",
@@ -30,10 +31,8 @@
     "@secux/app-xrp": "^3.0.1",
     "@secux/transport-webble": "^3.1.1",
     "@secux/transport-webusb": "^3.1.1",
-    "buffer": "^6.0.3",
     "clsx": "^1.1.1",
-    "lodash-es": "^4.17.21",
-    "node-polyfill-webpack-plugin": "^1.1.4",
+    "ethers": "^5.5.3",
     "prism-react-renderer": "^1.2.1",
     "randombytes": "^2.1.0",
     "react": "^17.0.1",
@@ -41,12 +40,14 @@
     "stellar-sdk": "^10.0.1",
     "tronweb": "^4.1.0",
     "ts-log": "^2.2.4",
-    "web3": "^1.7.0",
     "xrpl": "^2.1.1"
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "2.0.0-beta.14",
     "@tsconfig/docusaurus": "^1.0.4",
+    "buffer": "^6.0.3",
+    "lodash-es": "^4.17.21",
+    "node-polyfill-webpack-plugin": "^1.1.4",
     "typescript": "^4.5.2"
   },
   "browserslist": {

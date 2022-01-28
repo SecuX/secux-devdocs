@@ -95,23 +95,19 @@ Here is a demonstration of how to transfer Ether to others, you can also trigger
 ```jsx live
 // We cannot import packages in live editor, please uncomment it for use.
 // import { SecuxETH } from "@secux/app-eth";
+// import { ethers } from "ethers";
 
 function Example(props) {
   const [tranasction, setTransaction] = useState('');
 
   async function MakeTransaction(device) {
-    const web3 = new Web3(
-      new Web3.providers.HttpProvider("https://ropsten.infura.io/v3/<api key>")
-    );
-    
     const path = "m/44'/60'/0'/0/0";
     const fromAddress = await device.getAddress(path);
 
-    const nonce = await web3.eth.getTransactionCount(fromAddress);
-    const feeHistory = await web3.eth.getFeeHistory(1, "latest", [75]);
-    const fees = feeHistory.baseFeePerGas.map(x => parseInt(x.slice(2), 16));
-    const baseFee = Math.floor(fees.reduce((a, b) => a + b, 0) / fees.length) * 1e9;
-    const priorityFee = parseInt(feeHistory.reward[0][0].slice(2), 16);
+    // fetch data from etherscan api
+    const api = new ethers.providers.EtherscanProvider("rinkeby");
+    const nonce = await api.getTransactionCount(fromAddress);
+    const feeData = await api.getFeeData();
 
     // signing by SecuX
     const { commandData, rawTx } = SecuxETH.prepareSignEIP1559(
@@ -121,8 +117,8 @@ function Example(props) {
         to: "<Receiving Address>",
         value: 1e18,
         chainId: 3,
-        maxPriorityFeePerGas: priorityFee,
-        maxFeePerGas: (2 * baseFee + priorityFee),
+        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas.toHexString(),
+        maxFeePerGas: feeData.maxFeePerGas.toHexString(),
         gasLimit: 21000,
         // abi encoded string
         // data: "0x"
@@ -150,23 +146,19 @@ The following abi funciton calls are available:
 ```jsx live
 // We cannot import packages in live editor, please uncomment it for use.
 // import { SecuxETH } from "@secux/app-eth";
+// import { ethers } from "ethers";
 
 function Example(props) {
   const [tranasction, setTransaction] = useState('');
 
   async function MakeTransaction(device) {
-    const web3 = new Web3(
-      new Web3.providers.HttpProvider("https://ropsten.infura.io/v3/<api key>")
-    );
-    
     const path = "m/44'/60'/0'/0/0";
     const fromAddress = await device.getAddress(path);
 
-    const nonce = await web3.eth.getTransactionCount(fromAddress);
-    const feeHistory = await web3.eth.getFeeHistory(1, "latest", [75]);
-    const fees = feeHistory.baseFeePerGas.map(x => parseInt(x.slice(2), 16));
-    const baseFee = Math.floor(fees.reduce((a, b) => a + b, 0) / fees.length) * 1e9;
-    const priorityFee = parseInt(feeHistory.reward[0][0].slice(2), 16);
+    // fetch data from etherscan api
+    const api = new ethers.providers.EtherscanProvider("rinkeby");
+    const nonce = await api.getTransactionCount(fromAddress);
+    const feeData = await api.getFeeData();
 
     // signing by SecuX
     const { commandData, rawTx } = SecuxETH.ERC20.prepareTransferFrom(
@@ -176,9 +168,9 @@ function Example(props) {
         to: "<Contract Address>",
         value: 0,
         chainId: 3,
-        maxPriorityFeePerGas: priorityFee,
-        maxFeePerGas: (2 * baseFee + priorityFee),
-        gasLimit: 21000,
+        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas.toHexString(),
+        maxFeePerGas: feeData.maxFeePerGas.toHexString(),
+        gasLimit: 30000,
       },
       {
         fromAddress,
@@ -208,23 +200,19 @@ The following abi funciton calls are available:
 ```jsx live
 // We cannot import packages in live editor, please uncomment it for use.
 // import { SecuxETH } from "@secux/app-eth";
+// import { ethers } from "ethers";
 
 function Example(props) {
   const [tranasction, setTransaction] = useState('');
 
   async function MakeTransaction(device) {
-    const web3 = new Web3(
-      new Web3.providers.HttpProvider("https://ropsten.infura.io/v3/<api key>")
-    );
-    
     const path = "m/44'/60'/0'/0/0";
     const fromAddress = await device.getAddress(path);
 
-    const nonce = await web3.eth.getTransactionCount(fromAddress);
-    const feeHistory = await web3.eth.getFeeHistory(1, "latest", [75]);
-    const fees = feeHistory.baseFeePerGas.map(x => parseInt(x.slice(2), 16));
-    const baseFee = Math.floor(fees.reduce((a, b) => a + b, 0) / fees.length) * 1e9;
-    const priorityFee = parseInt(feeHistory.reward[0][0].slice(2), 16);
+    // fetch data from etherscan api
+    const api = new ethers.providers.EtherscanProvider("rinkeby");
+    const nonce = await api.getTransactionCount(fromAddress);
+    const feeData = await api.getFeeData();
 
     // signing by SecuX
     const { commandData, rawTx } = SecuxETH.ERC721.prepareSafeTransferFrom(
@@ -234,9 +222,9 @@ function Example(props) {
         to: "<Contract Address>",
         value: 0,
         chainId: 3,
-        maxPriorityFeePerGas: priorityFee,
-        maxFeePerGas: (2 * baseFee + priorityFee),
-        gasLimit: 21000,
+        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas.toHexString(),
+        maxFeePerGas: feeData.maxFeePerGas.toHexString(),
+        gasLimit: 30000,
       },
       {
         fromAddress,
@@ -263,23 +251,19 @@ function Example(props) {
 ```jsx live
 // We cannot import packages in live editor, please uncomment it for use.
 // import { SecuxETH } from "@secux/app-eth";
+// import { ethers } from "ethers";
 
 function Example(props) {
   const [tranasction, setTransaction] = useState('');
 
   async function MakeTransaction(device) {
-    const web3 = new Web3(
-      new Web3.providers.HttpProvider("https://ropsten.infura.io/v3/<api key>")
-    );
-    
     const path = "m/44'/60'/0'/0/0";
     const fromAddress = await device.getAddress(path);
 
-    const nonce = await web3.eth.getTransactionCount(fromAddress);
-    const feeHistory = await web3.eth.getFeeHistory(1, "latest", [75]);
-    const fees = feeHistory.baseFeePerGas.map(x => parseInt(x.slice(2), 16));
-    const baseFee = Math.floor(fees.reduce((a, b) => a + b, 0) / fees.length) * 1e9;
-    const priorityFee = parseInt(feeHistory.reward[0][0].slice(2), 16);
+    // fetch data from etherscan api
+    const api = new ethers.providers.EtherscanProvider("rinkeby");
+    const nonce = await api.getTransactionCount(fromAddress);
+    const feeData = await api.getFeeData();
 
     // signing by SecuX
     const { commandData, rawTx } = SecuxETH.prepareSignEIP155(
@@ -289,7 +273,7 @@ function Example(props) {
         to: "<Receiving Address>",
         value: 1e18,
         chainId: 3,
-        gasPrice: baseFee + priorityFee,
+        gasPrice: feeData.gasPrice.toHexString(),
         gasLimit: 21000,
         // abi encoded string
         // data: "0x"
@@ -314,23 +298,19 @@ function Example(props) {
 ```jsx live
 // We cannot import packages in live editor, please uncomment it for use.
 // import { SecuxETH } from "@secux/app-eth";
+// import { ethers } from "ethers";
 
 function Example(props) {
   const [tranasction, setTransaction] = useState('');
 
   async function MakeTransaction(device) {
-    const web3 = new Web3(
-      new Web3.providers.HttpProvider("https://ropsten.infura.io/v3/<api key>")
-    );
-    
     const path = "m/44'/60'/0'/0/0";
     const fromAddress = await device.getAddress(path);
 
-    const nonce = await web3.eth.getTransactionCount(fromAddress);
-    const feeHistory = await web3.eth.getFeeHistory(1, "latest", [75]);
-    const fees = feeHistory.baseFeePerGas.map(x => parseInt(x.slice(2), 16));
-    const baseFee = Math.floor(fees.reduce((a, b) => a + b, 0) / fees.length) * 1e9;
-    const priorityFee = parseInt(feeHistory.reward[0][0].slice(2), 16);
+    // fetch data from etherscan api
+    const api = new ethers.providers.EtherscanProvider("rinkeby");
+    const nonce = await api.getTransactionCount(fromAddress);
+    const feeData = await api.getFeeData();
 
     // signing by SecuX
     const { commandData, rawTx } = SecuxETH.ERC20.prepareTransferFrom(
@@ -340,8 +320,8 @@ function Example(props) {
         to: "<Contract Address>",
         value: 0,
         chainId: 3,
-        gasPrice: baseFee + priorityFee,
-        gasLimit: 21000,
+        gasPrice: feeData.gasPrice.toHexString(),
+        gasLimit: 30000,
       },
       {
         fromAddress,
@@ -368,24 +348,20 @@ function Example(props) {
 ```jsx live
 // We cannot import packages in live editor, please uncomment it for use.
 // import { SecuxETH } from "@secux/app-eth";
+// import { ethers } from "ethers";
 
 function Example(props) {
   const [tranasction, setTransaction] = useState('');
 
-  async function MakeTransaction(device) {
-    const web3 = new Web3(
-      new Web3.providers.HttpProvider("https://ropsten.infura.io/v3/<api key>")
-    );
-    
+  async function MakeTransaction(device) {    
     const path = "m/44'/60'/0'/0/0";
     const fromAddress = await device.getAddress(path);
 
-    const nonce = await web3.eth.getTransactionCount(fromAddress);
-    const feeHistory = await web3.eth.getFeeHistory(1, "latest", [75]);
-    const fees = feeHistory.baseFeePerGas.map(x => parseInt(x.slice(2), 16));
-    const baseFee = Math.floor(fees.reduce((a, b) => a + b, 0) / fees.length) * 1e9;
-    const priorityFee = parseInt(feeHistory.reward[0][0].slice(2), 16);
-
+    // fetch data from etherscan api
+    const api = new ethers.providers.EtherscanProvider("rinkeby");
+    const nonce = await api.getTransactionCount(fromAddress);
+    const feeData = await api.getFeeData();
+  
     // signing by SecuX
     const { commandData, rawTx } = SecuxETH.ERC721.prepareSafeTransferFrom(
       path,
@@ -394,8 +370,8 @@ function Example(props) {
         to: "<Contract Address>",
         value: 0,
         chainId: 3,
-        gasPrice: baseFee + priorityFee,
-        gasLimit: 21000,
+        gasPrice: feeData.gasPrice.toHexString(),
+        gasLimit: 30000,
       },
       {
         fromAddress,

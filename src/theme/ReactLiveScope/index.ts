@@ -17,7 +17,7 @@ import * as protocolInterface from "@secux/protocol-transaction/lib/interface";
 import * as btcLib from "@secux/app-btc";
 import mempoolJS from "@mempool/mempool.js";
 import * as ethLib from "@secux/app-eth";
-import Web3 from "web3";
+import { ethers } from "ethers";
 import * as bnbLib from "@secux/app-bnb";
 import * as adaLib from "@secux/app-ada";
 import { Cardano } from "@cardano-sdk/core";
@@ -45,7 +45,7 @@ const ReactLiveScope = {
     ...btcLib,
     mempoolJS,
     ...ethLib,
-    Web3,
+    ethers,
     ...bnbLib,
     ...adaLib,
     Cardano,
