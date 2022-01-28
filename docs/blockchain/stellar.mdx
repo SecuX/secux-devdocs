@@ -64,7 +64,7 @@ function Example(props) {
 ```jsx live
 // We cannot import packages in live editor, please uncomment it for use.
 // import { SecuxXLM } from "@secux/app-xlm";
-// import * as StellarSDK from "stellar-sdk";
+// import axios from "axios";
 
 function Example(props) {
   const [tranasction, setTransaction] = useState('');
@@ -75,12 +75,12 @@ function Example(props) {
     const toAddress = "<Receiving Address>";
 
     // fetch data from stellar api
-    const api = new StellarSDK.Server('https://horizon.stellar.org');
-    const { sequence } = await api.accounts().accountId(fromAddress).call();
-    const fee = await api.fetchBaseFee();
+    const url = "https://horizon.stellar.org";
+    const { sequence } = (await axios.get(`${url}/accounts/${fromAddress}`)).data;
+    const { last_ledger_base_fee } = (await axios.get(`${url}/fee_stats`)).data;
     const isNullAccount = async (address) => {
       try {
-        await api.accounts().accountId(address).call();
+        await axios.get(`${url}/accounts/${address}`);
       }
       catch (error) {
         return false;
@@ -97,7 +97,7 @@ function Example(props) {
         to: toAddress,
         amount: "1",
         sequence,
-        fee,
+        fee: last_ledger_base_fee,
         // for new address that don't have on-chain data
         needCreateAccount
       }

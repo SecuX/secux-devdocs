@@ -33,7 +33,7 @@ import * as xrpl from "xrpl";
 import * as trxLib from "@secux/app-trx";
 const TronWeb = require("tronweb");
 import * as xlmLib from "@secux/app-xlm";
-import * as StellarSDK from "stellar-sdk";
+import axios from "axios";
 
 
 // Add react-live imports you need here
@@ -61,7 +61,7 @@ const ReactLiveScope = {
     ...trxLib,
     TronWeb,
     ...xlmLib,
-    StellarSDK
+    axios
 };
 
 export default ReactLiveScope;
