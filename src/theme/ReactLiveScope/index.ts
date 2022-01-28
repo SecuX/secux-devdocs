@@ -26,8 +26,6 @@ import * as ethLib from "@secux/app-eth";
 import { ethers } from "ethers";
 import * as bnbLib from "@secux/app-bnb";
 import * as adaLib from "@secux/app-ada";
-import { Cardano } from "@cardano-sdk/core";
-import { blockfrostWalletProvider } from "@cardano-sdk/blockfrost";
 import * as xrpLib from "@secux/app-xrp";
 import * as xrpl from "xrpl";
 import * as trxLib from "@secux/app-trx";
@@ -54,8 +52,6 @@ const ReactLiveScope = {
     ethers,
     ...bnbLib,
     ...adaLib,
-    Cardano,
-    blockfrostWalletProvider,
     ...xrpLib,
     xrpl,
     ...trxLib,

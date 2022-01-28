@@ -103,7 +103,7 @@ According to Cardano network [configuration](https://hydra.iohk.io/build/7654130
 ```jsx live
 // We cannot import packages in live editor, please uncomment it for use.
 // import { SecuxADA, AddressType } from "@secux/app-ada";
-// import { blockfrostWalletProvider } from "@cardano-sdk/blockfrost";
+// import axios from "axios";
 
 function Example(props) {
   const [tranasction, setTransaction] = useState('');
@@ -117,20 +117,21 @@ function Example(props) {
     );
 
     // fetch data from cardano api
-    const api = blockfrostWalletProvider({ projectId: "<api key>" });
-    const utxos = await api.queryTransactionsByAddresses([ fromAddress ]);
+    const api = axios.create({
+      baseURL: "https://cardano-mainnet.blockfrost.io/api/v0",
+      headers: { "project_id": "<api key>" }
+    });
+    const utxos = (await api.get(`/addresses/${fromAddress}/utxos`)).data;
 
-    const inputs = utxos.map(({ id, body }) => {
-      const unspent = body.outputs.find(output => output.address === fromAddress);
-
-      return {
+    const inputs = utxos.map(utxo => (
+      {
         path,
-        txId: id,
-        index: body.outputs.indexOf(unspent),
-        amount: unspent.value.coins.toString(),
+        txId: utxo.tx_hash,
+        index: utxo.output_index,
+        amount: utxo.amount[0].quantity,
         xpublickey
       }
-    });
+    ));
 
     // signing by SecuX
     const { commandData, serialized } = SecuxADA.prepareSign(
@@ -164,7 +165,7 @@ function Example(props) {
 ```jsx live
 // We cannot import packages in live editor, please uncomment it for use.
 // import { SecuxADA, AddressType } from "@secux/app-ada";
-// import { blockfrostWalletProvider } from "@cardano-sdk/blockfrost";
+// import axios from "axios";
 
 function Example(props) {
   const [tranasction, setTransaction] = useState('');
@@ -178,18 +179,19 @@ function Example(props) {
     );
 
     // fetch data from cardano api
-    const api = blockfrostWalletProvider({ projectId: "<api key>" });
-    const utxos = await api.queryTransactionsByAddresses([ fromAddress ]);
-
-    const inputs = utxos.map(({ id, body }) => {
-      const unspent = body.outputs.find(output => output.address === fromAddress);
-
-      return {
-        txId: id,
-        index: body.outputs.indexOf(unspent),
-        amount: unspent.value.coins.toString(),
-      }
+    const api = axios.create({
+      baseURL: "https://cardano-mainnet.blockfrost.io/api/v0",
+      headers: { "project_id": "<api key>" }
     });
+    const utxos = (await api.get(`/addresses/${fromAddress}/utxos`)).data;
+
+    const inputs = utxos.map(utxo => (
+      {
+        txId: utxo.tx_hash,
+        index: utxo.output_index,
+        amount: utxo.amount[0].quantity
+      }
+    ));
 
     // signing by SecuX
     const { commandData, serialized } = SecuxADA.prepareStake(
@@ -223,8 +225,7 @@ function Example(props) {
 ```jsx live
 // We cannot import packages in live editor, please uncomment it for use.
 // import { SecuxADA, AddressType } from "@secux/app-ada";
-// import { blockfrostWalletProvider } from "@cardano-sdk/blockfrost";
-// import { Cardano } from "@cardano-sdk/core";
+// import axios from "axios";
 
 function Example(props) {
   const [tranasction, setTransaction] = useState('');
@@ -242,17 +243,17 @@ function Example(props) {
     );
 
     // fetch data from cardano api
-    const api = blockfrostWalletProvider({ projectId: "<api key>" });
-    const accountInfo = await api.utxoDelegationAndRewards(
-      [ fromAddress ], 
-      Cardano.RewardAccount(rewardAddress)
-    );
-
+    const api = axios.create({
+      baseURL: "https://cardano-mainnet.blockfrost.io/api/v0",
+      headers: { "project_id": "<api key>" }
+    });
+    const utxos = (await api.get(`/addresses/${fromAddress}/utxos`)).data;
     const utxo = {
-      txId: accountInfo.utxo[0][0].txId,
-      index: accountInfo.utxo[0][0].index,
-      amount: accountInfo.utxo[0][1].value.coins.toString()
+      txId: utxos[0].tx_hash,
+      index: utxos[0].output_index,
+      amount: utxos[0].amount[0].quantity
     };
+    const { withdrawable_amount } = (await api.get(`/accounts/${rewardAddress}`)).data;
 
     // signing by SecuX
     const { commandData, serialized } = SecuxADA.prepareWithdraw(
@@ -262,7 +263,7 @@ function Example(props) {
         changeAddress: fromAddress,
         xpublickey
       },
-      accountInfo.delegationAndRewards.rewards.toString()
+      withdrawable_amount
     );
     const response = await device.Exchange(commandData);
     const signedTx = SecuxADA.resolveTransaction(response, serialized);
@@ -283,8 +284,7 @@ function Example(props) {
 ```jsx live
 // We cannot import packages in live editor, please uncomment it for use.
 // import { SecuxADA, AddressType } from "@secux/app-ada";
-// import { blockfrostWalletProvider } from "@cardano-sdk/blockfrost";
-// import { Cardano } from "@cardano-sdk/core";
+// import axios from "axios";
 
 function Example(props) {
   const [tranasction, setTransaction] = useState('');
@@ -302,17 +302,17 @@ function Example(props) {
     );
 
     // fetch data from cardano api
-    const api = blockfrostWalletProvider({ projectId: "<api key>" });
-    const accountInfo = await api.utxoDelegationAndRewards(
-      [ fromAddress ], 
-      Cardano.RewardAccount(rewardAddress)
-    );
-
+    const api = axios.create({
+      baseURL: "https://cardano-mainnet.blockfrost.io/api/v0",
+      headers: { "project_id": "<api key>" }
+    });
+    const utxos = (await api.get(`/addresses/${fromAddress}/utxos`)).data;
     const utxo = {
-      txId: accountInfo.utxo[0][0].txId,
-      index: accountInfo.utxo[0][0].index,
-      amount: accountInfo.utxo[0][1].value.coins.toString()
+      txId: utxos[0].tx_hash,
+      index: utxos[0].output_index,
+      amount: utxos[0].amount[0].quantity
     };
+    const { withdrawable_amount } = (await api.get(`/accounts/${rewardAddress}`)).data;
 
     // signing by SecuX
     const { commandData, serialized } = SecuxADA.prepareUnstake(
@@ -322,10 +322,11 @@ function Example(props) {
         changeAddress: fromAddress,
         xpublickey
       },
-      {
+      (withdrawable_amount > 0) ?
         // if reward greater than 0, you need to do withdrawal
-        withdrawAmount: accountInfo.delegationAndRewards.rewards.toString()
-      }
+        { withdrawAmount: withdrawable_amount }
+        : 
+        undefined
     );
     const response = await device.Exchange(commandData);
     const signedTx = SecuxADA.resolveTransaction(response, serialized);
