@@ -88,7 +88,7 @@ function Example(props) {
         amount: 1e6,
         blockID: block.blockID,
         blockNumber: block.block_header.raw_data.number,
-        timestamp: Date.now()
+        timestamp: block.block_header.raw_data.timestamp
       }
     );
     const response = await device.Exchange(commandData);
@@ -133,7 +133,7 @@ function Example(props) {
         amount: 1e6,
         blockID: block.blockID,
         blockNumber: block.block_header.raw_data.number,
-        timestamp: Date.now()
+        timestamp: block.block_header.raw_data.timestamp
       }
     );
     const response = await device.Exchange(commandData);
@@ -178,7 +178,7 @@ function Example(props) {
         amount: 1e6,
         blockID: block.blockID,
         blockNumber: block.block_header.raw_data.number,
-        timestamp: Date.now()
+        timestamp: block.block_header.raw_data.timestamp
       }
     );
     const response = await device.Exchange(commandData);
