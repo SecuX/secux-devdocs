@@ -58,6 +58,7 @@ function Example(props) {
 ```jsx live
 // We cannot import packages in live editor, please uncomment it for use.
 // import { SecuxBNB } from "@secux/app-bnb";
+// import axios from "axios";
 
 function Example(props) {
   const [tranasction, setTransaction] = useState('');
@@ -65,6 +66,15 @@ function Example(props) {
   async function MakeTransaction(device) {
     const path = "m/44'/714'/0'/0/0";
     const publickey = await device.getPublickey(path);
+    const address = SecuxBNB.addressConvert(publickey);
+
+    // fetch data from cardano api
+    const api = axios.create({
+      baseURL: "https://dex.binance.org/api/v1",
+    });
+    const { account_number, sequence } = (await api.get(`/account/${address}`)).data;
+
+    // signing by SecuX
     const { commandData, serialized } = SecuxBNB.prepareSign(
       path,
       {
@@ -72,8 +82,8 @@ function Example(props) {
         to: "<Receiving Address>",
         amount: 1e8,
         // chainId: "Binance-Chain-Tigris",
-        // accountNumber: 0,
-        // sequence: 0,
+        // accountNumber: account_number,
+        // sequence: sequence,
         // memo: "",
       }
     );
