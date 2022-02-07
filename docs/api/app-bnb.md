@@ -3,7 +3,7 @@ title: '@secux/app-bnb'
 ---
 
 
-> [Binance Chain](https://www.binance.org/) is a blockchain software system developed by Binance and its community.
+> Binance Chain is a blockchain software system developed by Binance and its community.
 
 ## SecuxBNB
 

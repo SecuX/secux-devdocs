@@ -3,6 +3,8 @@ title: '@secux/app-trx'
 ---
 
 
+> TRON is an ambitious project dedicated to building the infrastructure for a truly decentralized Internet. The TRON Protocol, one of the largest blockchain based.
+
 ## SecuxTRX
 
 TRX package for SecuX device

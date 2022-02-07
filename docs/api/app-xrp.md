@@ -3,6 +3,8 @@ title: '@secux/app-xrp'
 ---
 
 
+> XRP is a digital asset built for payments. It is the native digital asset on the XRP Ledger—an open-source, permissionless and decentralized blockchain technology that can settle transactions in 3-5 seconds.
+
 ## SecuxXRP
 
 XRP package for SecuX device
