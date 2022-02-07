@@ -76,7 +76,7 @@ function Example(props) {
     const publickey = await device.getPublickey(path);
 
     // fetch data from ripple api
-    const api = new xrpl.BroadcastClient(["ws://s1.ripple.com"]);
+    const api = new xrpl.BroadcastClient(["wss://s1.ripple.com"]);
     await api.connect();
 
     let payment = {
