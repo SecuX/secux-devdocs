@@ -5,27 +5,13 @@ title: '@secux/app-eth'
 
 > Ethereum is open access to digital money and data-friendly services for everyone. It's a community-built technology behind the cryptocurrency ether (ETH) and thousands of applications you can use today.
 
-## SecuxETH
+<a name="SecuxETH"></a>
 
+## SecuxETH
 ETH package for SecuX device
 
 **Kind**: global class  
 <h2>Properties</h2>
-
-### prepareAddress
-***
-SecuxETH.prepareAddress ⇒ <code>communicationData</code>
-***
-
-*Prepare data for address generation.*
-
-**Returns**: <code>communicationData</code> - data for sending to device  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| path | <code>string</code> | m/44'/60'/... |
-
-<br/>
 
 ### addressConvert
 ***
@@ -42,6 +28,21 @@ SecuxETH.addressConvert(publickey) ⇒ <code>string</code>
 
 <br/>
 
+### prepareAddress
+***
+SecuxETH.prepareAddress(path) ⇒ [<code>communicationData</code>](#communicationData)
+***
+
+*Prepare data for address generation.*
+
+**Returns**: [<code>communicationData</code>](#communicationData) - data for sending to device  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| path | <code>string</code> | m/44'/60'/... |
+
+<br/>
+
 ### resolveAddress
 ***
 SecuxETH.resolveAddress(response) ⇒ <code>string</code>
@@ -53,18 +54,18 @@ SecuxETH.resolveAddress(response) ⇒ <code>string</code>
 
 | Param | Type | Description |
 | --- | --- | --- |
-| response | <code>communicationData</code> | data from device |
+| response | [<code>communicationData</code>](#communicationData) | data from device |
 
 <br/>
 
 ### preparePublickey
 ***
-SecuxETH.preparePublickey(path) ⇒ <code>communicationData</code>
+SecuxETH.preparePublickey(path) ⇒ [<code>communicationData</code>](#communicationData)
 ***
 
 *Prepare data for secp256k1 publickey.*
 
-**Returns**: <code>communicationData</code> - data for sending to device  
+**Returns**: [<code>communicationData</code>](#communicationData) - data for sending to device  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -83,18 +84,18 @@ SecuxETH.resolvePublickey(response) ⇒ <code>string</code>
 
 | Param | Type | Description |
 | --- | --- | --- |
-| response | <code>communicationData</code> | data from device |
+| response | [<code>communicationData</code>](#communicationData) | data from device |
 
 <br/>
 
 ### prepareXPublickey
 ***
-SecuxETH.prepareXPublickey(path) ⇒ <code>communicationData</code>
+SecuxETH.prepareXPublickey(path) ⇒ [<code>communicationData</code>](#communicationData)
 ***
 
 *Prepare data for xpub generation.*
 
-**Returns**: <code>communicationData</code> - data for sending to device  
+**Returns**: [<code>communicationData</code>](#communicationData) - data for sending to device  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -113,24 +114,24 @@ SecuxETH.resolveXPublickey(response, path) ⇒ <code>string</code>
 
 | Param | Type | Description |
 | --- | --- | --- |
-| response | <code>communicationData</code> | data from device |
+| response | [<code>communicationData</code>](#communicationData) | data from device |
 | path | <code>string</code> | m/44'/60'/... |
 
 <br/>
 
 ### prepareSignSerialized
 ***
-SecuxETH.prepareSignSerialized(path, serialized) ⇒ <code>communicationData</code>
+SecuxETH.prepareSignSerialized(path, serialized) ⇒ [<code>communicationData</code>](#communicationData)
 ***
 
 *Convert unsigned transaction to command data.*
 
-**Returns**: <code>communicationData</code> - data for sending to device  
+**Returns**: [<code>communicationData</code>](#communicationData) - data for sending to device  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | path | <code>string</code> | m/44'/60'/... |
-| serialized | <code>communicationData</code> | unsigned transaction |
+| serialized | [<code>communicationData</code>](#communicationData) | unsigned transaction |
 
 <br/>
 
@@ -145,7 +146,7 @@ SecuxETH.resolveSignature(response) ⇒ <code>string</code>
 
 | Param | Type | Description |
 | --- | --- | --- |
-| response | <code>communicationData</code> | data from device |
+| response | [<code>communicationData</code>](#communicationData) | data from device |
 
 <br/>
 
@@ -160,8 +161,8 @@ SecuxETH.resolveTransaction(response, serialized) ⇒ <code>string</code>
 
 | Param | Type | Description |
 | --- | --- | --- |
-| response | <code>communicationData</code> | data from device |
-| serialized | <code>communicationData</code> | unsigned transaction |
+| response | [<code>communicationData</code>](#communicationData) | data from device |
+| serialized | [<code>communicationData</code>](#communicationData) | unsigned transaction |
 
 <br/>
 
@@ -192,7 +193,7 @@ SecuxETH.resolveSignatureEIP155(response, [chainId]) ⇒ <code>string</code>
 
 | Param | Type | Description |
 | --- | --- | --- |
-| response | <code>communicationData</code> | data from device |
+| response | [<code>communicationData</code>](#communicationData) | data from device |
 | [chainId] | <code>number</code> | if give a chainId, the signature will be EIP-155 applied |
 
 <br/>
@@ -215,12 +216,12 @@ SecuxETH.prepareSignEIP1559(path, content) ⇒ [<code>prepared</code>](#prepared
 
 ### prepareSignMessage
 ***
-SecuxETH.prepareSignMessage(path, message) ⇒ <code>communicationData</code>
+SecuxETH.prepareSignMessage(path, message) ⇒ [<code>communicationData</code>](#communicationData)
 ***
 
 *Prepare data for signing.*
 
-**Returns**: <code>communicationData</code> - data for sending to device  
+**Returns**: [<code>communicationData</code>](#communicationData) - data for sending to device  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -231,12 +232,12 @@ SecuxETH.prepareSignMessage(path, message) ⇒ <code>communicationData</code>
 
 ### prepareSignTypedData
 ***
-SecuxETH.prepareSignTypedData(path, data) ⇒ <code>communicationData</code>
+SecuxETH.prepareSignTypedData(path, data) ⇒ [<code>communicationData</code>](#communicationData)
 ***
 
 *Prepare data for signing.*
 
-**Returns**: <code>communicationData</code> - data for sending to device  
+**Returns**: [<code>communicationData</code>](#communicationData) - data for sending to device  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -261,54 +262,57 @@ SecuxETH.prepareSignWalletConnectTransaction(path, content) ⇒ [<code>prepared<
 
 <br/>
 
-
 ## Types
 
+<a name="communicationData"></a>
 
-<a name="SecuxETH"></a>
+### communicationData : <code>string</code> \| <code>Buffer</code>
+*Data type for transmission.*
 
-
-
-
+<br/>
 
 <a name="tx155"></a>
 
-### tx155
+### tx155 : <code>object</code>
+*The payment object for EIP-155.*
 
 | Name | Type | Description |
 | --- | --- | --- |
 | chainId | <code>number</code> | network for ethereum ecosystem |
 | to | <code>string</code> | receiving address |
 | value | <code>number</code> \| <code>string</code> | sending amount |
-| nonce | <code>number</code> \| <code>string</code> |  |
-| gasPrice | <code>number</code> \| <code>string</code> |  |
-| gasLimit | <code>number</code> \| <code>string</code> |  |
-| [data] | <code>string</code> |  |
-
-
-<a name="prepared"></a>
-
-### prepared
-
-| Name | Type | Description |
-| --- | --- | --- |
-| commandData | <code>communicationData</code> | data for sending to device |
-| serialized | <code>communicationData</code> | unsigned transaction |
-
+| nonce | <code>number</code> \| <code>string</code> | the number of transactions sent from this address |
+| gasPrice | <code>number</code> \| <code>string</code> | the price of gas (unit: wei) |
+| gasLimit | <code>number</code> \| <code>string</code> | the maximum amount of gas you are willing to consume |
+| [data] | <code>string</code> | abi-encoded data payload |
+<br/>
 
 <a name="tx1559"></a>
 
-### tx1559
+### tx1559 : <code>object</code>
+*The payment object for EIP-1559.*
 
 | Name | Type | Description |
 | --- | --- | --- |
 | chainId | <code>number</code> | network for ethereum ecosystem |
 | to | <code>string</code> | receiving address |
 | value | <code>number</code> \| <code>string</code> | sending amount |
-| nonce | <code>number</code> \| <code>string</code> |  |
-| maxPriorityFeePerGas | <code>number</code> \| <code>string</code> |  |
-| maxFeePerGas | <code>number</code> \| <code>string</code> |  |
-| gasLimit | <code>number</code> \| <code>string</code> |  |
+| nonce | <code>number</code> \| <code>string</code> | the number of transactions sent from this address |
+| maxPriorityFeePerGas | <code>number</code> \| <code>string</code> | the maximum priority fee of gas (unit: wei) |
+| maxFeePerGas | <code>number</code> \| <code>string</code> | the maximum price of gas (unit: wei) |
+| gasLimit | <code>number</code> \| <code>string</code> | the maximum amount of gas you are willing to consume |
 | [content.accessList] | <code>Array&lt;any&gt;</code> |  |
-| [data] | <code>string</code> |  |
+| [data] | <code>string</code> | abi-encoded data payload |
+<br/>
+
+<a name="prepared"></a>
+
+### prepared : <code>object</code>
+*Object for the signing and validation.*
+
+| Name | Type | Description |
+| --- | --- | --- |
+| commandData | [<code>communicationData</code>](#communicationData) | data for sending to device |
+| serialized | [<code>communicationData</code>](#communicationData) | unsigned transaction |
+<br/>
 

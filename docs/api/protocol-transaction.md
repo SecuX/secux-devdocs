@@ -1,10 +1,11 @@
 ---
 title: '@secux/protocol-transaction'
+sidebar_position: 1
 ---
 
+<a name="SecuxTransactionTool"></a>
 
 ## SecuxTransactionTool
-
 Protocol layer of transaction related method
 
 **Kind**: global class  
@@ -76,7 +77,7 @@ SecuxTransactionTool.getXPublickey(path, curve) ⇒ [<code>communicationData</co
 
 ### resolveXPublickey
 ***
-SecuxTransactionTool.resolveXPublickey(response, path) ⇒ <code>string</code>
+SecuxTransactionTool.resolveXPublickey(response, path, curve) ⇒ <code>string</code>
 ***
 
 *Reslove extended publickey from SecuX device.*
@@ -87,6 +88,7 @@ SecuxTransactionTool.resolveXPublickey(response, path) ⇒ <code>string</code>
 | --- | --- | --- |
 | response | [<code>communicationData</code>](#communicationData) | data from device |
 | path | <code>string</code> | BIP32 |
+| curve | [<code>EllipticCurve</code>](#EllipticCurve) | 0: SECP256K1, 2: ED25519_ADA |
 
 <br/>
 
@@ -133,20 +135,20 @@ SecuxTransactionTool.signTransactionList(paths, txs, [otpion]) ⇒ [<code>commun
 
 | Param | Type | Description |
 | --- | --- | --- |
-| paths | <code>Array.&lt;string&gt;</code> | BIP32 |
-| txs | <code>Array.&lt;Buffer&gt;</code> | prepared transaction data corresponding to above path |
+| paths | <code>Array&lt;string&gt;</code> | BIP32 |
+| txs | <code>Array&lt;Buffer&gt;</code> | prepared transaction data corresponding to above path |
 | [otpion] | [<code>TransactionOption</code>](#TransactionOption) |  |
 
 <br/>
 
 ### resolveSignatureList
 ***
-SecuxTransactionTool.resolveSignatureList(response) ⇒ <code>Array.&lt;string&gt;</code>
+SecuxTransactionTool.resolveSignatureList(response) ⇒ <code>Array&lt;string&gt;</code>
 ***
 
 *Reslove signature from SecuX device.*
 
-**Returns**: <code>Array.&lt;string&gt;</code> - signature array of base64 string  
+**Returns**: <code>Array&lt;string&gt;</code> - signature array of base64 string  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -182,8 +184,8 @@ SecuxTransactionTool.signRawTransactionList(paths, txs, [confirm], [otpion]) ⇒
 
 | Param | Type | Description |
 | --- | --- | --- |
-| paths | <code>Array.&lt;string&gt;</code> | BIP32 |
-| txs | <code>Array.&lt;Buffer&gt;</code> | prepared transaction data corresponding to above path |
+| paths | <code>Array&lt;string&gt;</code> | BIP32 |
+| txs | <code>Array&lt;Buffer&gt;</code> | prepared transaction data corresponding to above path |
 | [confirm] | [<code>communicationData</code>](#communicationData) |  |
 | [otpion] | [<code>TransactionOption</code>](#TransactionOption) |  |
 
@@ -202,7 +204,7 @@ SecuxTransactionTool.signMessage(path, msg, [option]) ⇒ [<code>communicationDa
 | --- | --- | --- |
 | path | <code>string</code> | BIP32 |
 | msg | [<code>communicationData</code>](#communicationData) |  |
-| [option] | <code>MessageOption</code> |  |
+| [option] | [<code>TransactionOption</code>](#TransactionOption) |  |
 
 <br/>
 
@@ -219,13 +221,13 @@ SecuxTransactionTool.signTypedMessage(path, typedMessageHash, [option]) ⇒ [<co
 | --- | --- | --- |
 | path | <code>string</code> | BIP32 |
 | typedMessageHash | [<code>communicationData</code>](#communicationData) |  |
-| [option] | <code>MessageOption</code> |  |
+| [option] | [<code>TransactionOption</code>](#TransactionOption) |  |
 
 <br/>
 
-### ~~txPrepare~~
+### txPrepare
 ***
-SecuxTransactionTool.txPrepare(path, inputId, tx, confirm, [isToken]) ⇒ [<code>communicationData</code>](#communicationData)
+~~SecuxTransactionTool.txPrepare(path, inputId, tx, confirm, [isToken]) ⇒ [<code>communicationData</code>](#communicationData)~~
 ***
 ***Deprecated***
 
@@ -244,9 +246,9 @@ SecuxTransactionTool.txPrepare(path, inputId, tx, confirm, [isToken]) ⇒ [<code
 
 <br/>
 
-### ~~txBegin~~
+### txBegin
 ***
-SecuxTransactionTool.txBegin(amount, toAddress, [showConfirm]) ⇒ [<code>communicationData</code>](#communicationData)
+~~SecuxTransactionTool.txBegin(amount, toAddress, [showConfirm]) ⇒ [<code>communicationData</code>](#communicationData)~~
 ***
 ***Deprecated***
 
@@ -263,9 +265,9 @@ SecuxTransactionTool.txBegin(amount, toAddress, [showConfirm]) ⇒ [<code>commun
 
 <br/>
 
-### ~~txEnd~~
+### txEnd
 ***
-SecuxTransactionTool.txEnd() ⇒ [<code>communicationData</code>](#communicationData)
+~~SecuxTransactionTool.txEnd() ⇒ [<code>communicationData</code>](#communicationData)~~
 ***
 ***Deprecated***
 
@@ -275,9 +277,9 @@ SecuxTransactionTool.txEnd() ⇒ [<code>communicationData</code>](#communication
 **Returns**: [<code>communicationData</code>](#communicationData) - data for sending to device  
 <br/>
 
-### ~~txSign~~
+### txSign
 ***
-SecuxTransactionTool.txSign(inputId) ⇒ [<code>communicationData</code>](#communicationData)
+~~SecuxTransactionTool.txSign(inputId) ⇒ [<code>communicationData</code>](#communicationData)~~
 ***
 ***Deprecated***
 
@@ -292,37 +294,43 @@ SecuxTransactionTool.txSign(inputId) ⇒ [<code>communicationData</code>](#commu
 
 <br/>
 
-
 ## Types
 
 <a name="communicationData"></a>
 
-### communicationData
-***
-communicationData: `base64String` | `Buffer`
-***
+### communicationData : <code>string</code> \| <code>Buffer</code>
+*Data type for transmission.*
 
-
-<a name="SecuxTransactionTool"></a>
-
-
-
-
+<br/>
 
 <a name="IAPDUResponse"></a>
 
-### IAPDUResponse
+### IAPDUResponse : <code>object</code>
+*Response object from device.*
 
 | Name | Type | Description |
 | --- | --- | --- |
 | status | <code>number</code> | StatusCode |
-| data | <code>string</code> | base64 encoded |
+| data | <code>string</code> | base64 encoded buffer |
 | dataLength | <code>number</code> | length of the data |
+<br/>
 
+<a name="TransactionOption"></a>
+
+### TransactionOption : <code>object</code>
+*Options for the signing*
+
+| Name | Type | Description |
+| --- | --- | --- |
+| [tp] | [<code>TransactionType</code>](#TransactionType) | the type of payment |
+| [curve] | [<code>EllipticCurve</code>](#EllipticCurve) |  |
+| [chainId] | <code>number</code> | for ethereum networks |
+<br/>
 
 <a name="StatusCode"></a>
 
-### StatusCode
+### StatusCode : <code>enum</code>
+*Status code of response.*
 
 | Name | Type | Description |
 | --- | --- | --- |
@@ -330,42 +338,29 @@ communicationData: `base64String` | `Buffer`
 | CLA_ERROR | <code>number</code> | 0x5002 |
 | INS_ERROR | <code>number</code> | 0x5003 |
 | SUCCESS | <code>number</code> | 0x9000 |
+<br/>
 
+<a name="EllipticCurve"></a>
 
-<a name="communicationData"></a>
+### EllipticCurve : <code>enum</code>
+*Supported curve.*
 
-
-
-
+| Name | Type | Description |
+| --- | --- | --- |
+| SECP256K1 | <code>number</code> | 0 |
+| ED25519 | <code>number</code> | 1 |
+| ED25519_ADA | <code>number</code> | 2 |
+<br/>
 
 <a name="TransactionType"></a>
 
-### TransactionType
+### TransactionType : <code>enum</code>
+*The type of payment.*
 
 | Name | Type | Description |
 | --- | --- | --- |
 | NORMAL | <code>number</code> | 0 |
 | TOKEN | <code>number</code> | 1 |
 | NFT | <code>number</code> | 2 |
-
-
-<a name="EllipticCurve"></a>
-
-### EllipticCurve
-
-| Name | Type | Description |
-| --- | --- | --- |
-| SECP256K1 | <code>number</code> | 0 |
-| ED25519 | <code>number</code> | 1 |
-
-
-<a name="TransactionOption"></a>
-
-### TransactionOption
-
-| Name | Type |
-| --- | --- |
-| tp | [<code>TransactionType</code>](#TransactionType) | 
-| curve | [<code>EllipticCurve</code>](#EllipticCurve) | 
-| chainId | <code>number</code> | 
+<br/>
 

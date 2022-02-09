@@ -5,28 +5,13 @@ title: '@secux/app-btc'
 
 > Bitcoin is a decentralized digital currency that you can buy, sell and exchange directly, without an intermediary like a bank. Bitcoin’s creator, Satoshi Nakamoto, originally described the need for “an electronic payment system based on cryptographic proof instead of trust.”
 
-## SecuxBTC
+<a name="SecuxBTC"></a>
 
+## SecuxBTC
 BTC package for SecuX device
 
 **Kind**: global class  
 <h2>Properties</h2>
-
-### prepareAddress
-***
-SecuxBTC.prepareAddress ⇒ <code>communicationData</code>
-***
-
-*Prepare data for address generation.*
-
-**Returns**: <code>communicationData</code> - data for sending to device  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| path | <code>string</code> | BIP32 path, ex: m/44'/0'/0'/0/0 |
-| [option] | [<code>AddressOption</code>](#AddressOption) | for path validation |
-
-<br/>
 
 ### addressConvert
 ***
@@ -44,6 +29,22 @@ SecuxBTC.addressConvert(publickey, path) ⇒ <code>string</code>
 
 <br/>
 
+### prepareAddress
+***
+SecuxBTC.prepareAddress(path, [option]) ⇒ [<code>communicationData</code>](#communicationData)
+***
+
+*Prepare data for address generation.*
+
+**Returns**: [<code>communicationData</code>](#communicationData) - data for sending to device  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| path | <code>string</code> | BIP32 path, ex: m/44'/0'/0'/0/0 |
+| [option] | [<code>AddressOption</code>](#AddressOption) | for path validation |
+
+<br/>
+
 ### resolveAddress
 ***
 SecuxBTC.resolveAddress(response, path) ⇒ <code>string</code>
@@ -55,19 +56,19 @@ SecuxBTC.resolveAddress(response, path) ⇒ <code>string</code>
 
 | Param | Type | Description |
 | --- | --- | --- |
-| response | <code>communicationData</code> | data from device |
+| response | [<code>communicationData</code>](#communicationData) | data from device |
 | path | <code>string</code> \| [<code>PathObject</code>](#PathObject) | BIP32 path, ex: m/44'/0'/0'/0/0 |
 
 <br/>
 
 ### preparePublickey
 ***
-SecuxBTC.preparePublickey(path, [option]) ⇒ <code>communicationData</code>
+SecuxBTC.preparePublickey(path, [option]) ⇒ [<code>communicationData</code>](#communicationData)
 ***
 
 *Prepare data for secp256k1 publickey.*
 
-**Returns**: <code>communicationData</code> - data for sending to device  
+**Returns**: [<code>communicationData</code>](#communicationData) - data for sending to device  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -87,18 +88,18 @@ SecuxBTC.resolvePublickey(response) ⇒ <code>string</code>
 
 | Param | Type | Description |
 | --- | --- | --- |
-| response | <code>communicationData</code> | data from device |
+| response | [<code>communicationData</code>](#communicationData) | data from device |
 
 <br/>
 
 ### prepareXPublickey
 ***
-SecuxBTC.prepareXPublickey(path) ⇒ <code>communicationData</code>
+SecuxBTC.prepareXPublickey(path) ⇒ [<code>communicationData</code>](#communicationData)
 ***
 
 *Prepare data for extended publickey generation.*
 
-**Returns**: <code>communicationData</code> - data for sending to device  
+**Returns**: [<code>communicationData</code>](#communicationData) - data for sending to device  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -117,7 +118,7 @@ SecuxBTC.resolveXPublickey(response, path) ⇒ <code>string</code>
 
 | Param | Type | Description |
 | --- | --- | --- |
-| response | <code>communicationData</code> | data from device |
+| response | [<code>communicationData</code>](#communicationData) | data from device |
 | path | <code>string</code> | BIP32 path, ex: m/44'/0'/0'/0/0 |
 
 <br/>
@@ -149,7 +150,7 @@ SecuxBTC.resolveSignatureList(response) ⇒ <code>Array&lt;string&gt;</code>
 
 | Param | Type | Description |
 | --- | --- | --- |
-| response | <code>communicationData</code> | data from device |
+| response | [<code>communicationData</code>](#communicationData) | data from device |
 
 <br/>
 
@@ -164,10 +165,10 @@ SecuxBTC.resolveTransaction(response, unsigned, publickeys, [coin]) ⇒ <code>st
 
 | Param | Type | Description |
 | --- | --- | --- |
-| response | <code>communicationData</code> | data from device |
+| response | [<code>communicationData</code>](#communicationData) | data from device |
 | unsigned | <code>string</code> | unsigned raw transaction |
-| publickeys | <code>Array&lt;communicationData&gt;</code> | secp256k1 publickey correspond to each input |
-| [coin] | <code>CoinType</code> | default: CoinType.BITCOIN |
+| publickeys | [<code>Array&lt;communicationData&gt;</code>](#communicationData) | secp256k1 publickey correspond to each input |
+| [coin] | [<code>CoinType</code>](#CoinType) | default: CoinType.BITCOIN |
 
 <br/>
 
@@ -189,19 +190,89 @@ SecuxBTC.deriveAddress(xpub, change, addressIndex, [option]) ⇒ <code>string</c
 
 <br/>
 
+### getVirtualSize
+***
+SecuxBTC.getVirtualSize(inputs, outputs) ⇒ <code>number</code>
+***
+
+*Estimate virtual size of transaction.*
+
+**Returns**: <code>number</code> - virtual size  
+
+| Param | Type |
+| --- | --- |
+| inputs | [<code>Array&lt;ScriptType&gt;</code>](#ScriptType) | 
+| outputs | [<code>Array&lt;ScriptType&gt;</code>](#ScriptType) | 
+
+<br/>
 
 ## Types
 
+<a name="communicationData"></a>
 
-<a name="SecuxBTC"></a>
+### communicationData : <code>string</code> \| <code>Buffer</code>
+*Data type for transmission.*
 
+<br/>
 
+<a name="ScriptType"></a>
 
+### ScriptType : <code>enum</code>
+*Script type for input/output.*
 
+| Name | Type | Description |
+| --- | --- | --- |
+| P2PKH | <code>number</code> | 0 |
+| P2WPKH | <code>number</code> | 1 |
+| P2SH_P2PKH | <code>number</code> | 2 |
+| P2SH_P2WPKH | <code>number</code> | 3 |
+| P2TR | <code>number</code> | 4 |
+<br/>
+
+<a name="CoinType"></a>
+
+### CoinType : <code>enum</code>
+*Coins that are nearly identical to Bitcoin.*
+
+| Name | Type | Description |
+| --- | --- | --- |
+| BITCOIN | <code>number</code> | 0 |
+| TESTNET | <code>number</code> | 1 |
+| REGTEST | <code>number</code> | 2 |
+| LITECOIN | <code>number</code> | 3 |
+| BITCOINCASH | <code>number</code> | 4 |
+| GROESTL | <code>number</code> | 5 |
+| DIGIBYTE | <code>number</code> | 6 |
+| DASH | <code>number</code> | 7 |
+| DOGECOIN | <code>number</code> | 8 |
+<br/>
+
+<a name="PathObject"></a>
+
+### PathObject : <code>object</code>
+*Parameters for address generation.*
+
+| Name | Type | Description |
+| --- | --- | --- |
+| coin | [<code>CoinType</code>](#CoinType) | enum |
+| script | [<code>ScriptType</code>](#ScriptType) | enum |
+<br/>
+
+<a name="AddressOption"></a>
+
+### AddressOption : <code>object</code>
+*Options for path validation.*
+
+| Name | Type | Description |
+| --- | --- | --- |
+| [coin] | [<code>CoinType</code>](#CoinType) | enum |
+| [script] | [<code>ScriptType</code>](#ScriptType) | enum |
+<br/>
 
 <a name="txInput"></a>
 
-### txInput
+### txInput : <code>object</code>
+*UTXO.*
 
 | Name | Type | Description |
 | --- | --- | --- |
@@ -210,78 +281,64 @@ SecuxBTC.deriveAddress(xpub, change, addressIndex, [option]) ⇒ <code>string</c
 | hash | <code>string</code> | referenced transaction hash |
 | vout | <code>number</code> | referenced transaction output index |
 | satoshis | <code>number</code> | referenced transaction output amount |
-| [script] | <code>ScriptType</code> | script type related to `path` |
+| [script] | [<code>ScriptType</code>](#ScriptType) | script type related to `path` |
 | [txHex] | <code>string</code> | referenced raw transaction for validation |
-
+<br/>
 
 <a name="txOutput"></a>
 
-### txOutput
+### txOutput : <code>object</code>
+*Outputs consist of one payment and one or no return.*
 
 | Name | Type | Description |
 | --- | --- | --- |
 | to | [<code>txOutputAddress</code>](#txOutputAddress) \| [<code>txOutputScriptExtened</code>](#txOutputScriptExtened) | receiving address information |
 | [utxo] | [<code>txOutputScriptExtened</code>](#txOutputScriptExtened) | changes |
-
-
-<a name="SignOption"></a>
-
-### SignOption
-
-| Name | Type | Description |
-| --- | --- | --- |
-| [coin] | <code>CoinType</code> | enum |
-| [feeRate] | <code>number</code> | base fee per vbyte |
-
+<br/>
 
 <a name="txOutputAddress"></a>
 
-### txOutputAddress
+### txOutputAddress : <code>object</code>
+*Receiving address and payment.*
 
 | Name | Type | Description |
 | --- | --- | --- |
 | address | <code>string</code> | receiving address |
 | satoshis | <code>number</code> | receiving amount |
-
+<br/>
 
 <a name="txOutputScriptExtened"></a>
 
-### txOutputScriptExtened
+### txOutputScriptExtened : <code>object</code>
+*Payment for another held account.*
 
 | Name | Type | Description |
 | --- | --- | --- |
 | path | <code>string</code> | BIP32 path |
 | publickey | <code>string</code> \| <code>Buffer</code> | scep256k1 publickey from `path` |
 | satoshis | <code>number</code> | amount |
-| [script] | <code>ScriptType</code> | script type related to `path` |
+| [script] | [<code>ScriptType</code>](#ScriptType) | script type related to `path` |
+<br/>
 
+<a name="SignOption"></a>
+
+### SignOption : <code>object</code>
+*Options used during the signing.*
+
+| Name | Type | Description |
+| --- | --- | --- |
+| [coin] | [<code>CoinType</code>](#CoinType) | check cointype for each input |
+| [feeRate] | <code>number</code> | calculate optimal transaction fee and replace it |
+<br/>
 
 <a name="prepared"></a>
 
-### prepared
+### prepared : <code>object</code>
+*Object for the signing and validation.*
 
 | Name | Type | Description |
 | --- | --- | --- |
-| commandData | <code>communicationData</code> | data for sending to device |
+| commandData | [<code>communicationData</code>](#communicationData) | data for sending to device |
 | rawTx | <code>string</code> | unsigned raw transaction |
-
-
-<a name="PathObject"></a>
-
-### PathObject
-
-| Name | Type | Description |
-| --- | --- | --- |
-| coin | <code>CoinType</code> | enum |
-| script | <code>ScriptType</code> | enum |
-
-
-<a name="AddressOption"></a>
-
-### AddressOption
-
-| Name | Type | Description |
-| --- | --- | --- |
-| [coin] | <code>CoinType</code> | enum |
-| [script] | <code>ScriptType</code> | enum |
+<br/>
 

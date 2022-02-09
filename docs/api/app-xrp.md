@@ -5,27 +5,13 @@ title: '@secux/app-xrp'
 
 > XRP is a digital asset built for payments. It is the native digital asset on the XRP Ledger—an open-source, permissionless and decentralized blockchain technology that can settle transactions in 3-5 seconds.
 
-## SecuxXRP
+<a name="SecuxXRP"></a>
 
+## SecuxXRP
 XRP package for SecuX device
 
 **Kind**: global class  
 <h2>Properties</h2>
-
-### prepareAddress
-***
-SecuxXRP.prepareAddress ⇒ <code>communicationData</code>
-***
-
-*Prepare data for XRP address.*
-
-**Returns**: <code>communicationData</code> - data for sending to device  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| path | <code>string</code> | m/44'/144'/... |
-
-<br/>
 
 ### addressConvert
 ***
@@ -42,6 +28,21 @@ SecuxXRP.addressConvert(publickey) ⇒ <code>string</code>
 
 <br/>
 
+### prepareAddress
+***
+SecuxXRP.prepareAddress(path) ⇒ [<code>communicationData</code>](#communicationData)
+***
+
+*Prepare data for XRP address.*
+
+**Returns**: [<code>communicationData</code>](#communicationData) - data for sending to device  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| path | <code>string</code> | m/44'/144'/... |
+
+<br/>
+
 ### resolveAddress
 ***
 SecuxXRP.resolveAddress(response) ⇒ <code>string</code>
@@ -53,18 +54,18 @@ SecuxXRP.resolveAddress(response) ⇒ <code>string</code>
 
 | Param | Type | Description |
 | --- | --- | --- |
-| response | <code>communicationData</code> | data from device |
+| response | [<code>communicationData</code>](#communicationData) | data from device |
 
 <br/>
 
 ### preparePublickey
 ***
-SecuxXRP.preparePublickey(path) ⇒ <code>communicationData</code>
+SecuxXRP.preparePublickey(path) ⇒ [<code>communicationData</code>](#communicationData)
 ***
 
 *Prepare data for secp256k1 publickey.*
 
-**Returns**: <code>communicationData</code> - data for sending to device  
+**Returns**: [<code>communicationData</code>](#communicationData) - data for sending to device  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -83,18 +84,18 @@ SecuxXRP.resolvePublickey(response) ⇒ <code>string</code>
 
 | Param | Type | Description |
 | --- | --- | --- |
-| response | <code>communicationData</code> | data from device |
+| response | [<code>communicationData</code>](#communicationData) | data from device |
 
 <br/>
 
 ### prepareXPublickey
 ***
-SecuxXRP.prepareXPublickey(path) ⇒ <code>communicationData</code>
+SecuxXRP.prepareXPublickey(path) ⇒ [<code>communicationData</code>](#communicationData)
 ***
 
 *Prepare data for xpub.*
 
-**Returns**: <code>communicationData</code> - data for sending to device  
+**Returns**: [<code>communicationData</code>](#communicationData) - data for sending to device  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -113,7 +114,7 @@ SecuxXRP.resolveXPublickey(response, path) ⇒ <code>string</code>
 
 | Param | Type | Description |
 | --- | --- | --- |
-| response | <code>communicationData</code> | data from device |
+| response | [<code>communicationData</code>](#communicationData) | data from device |
 | path | <code>string</code> | m/44'/144'/... |
 
 <br/>
@@ -145,7 +146,7 @@ SecuxXRP.resolveSignature(response) ⇒ <code>string</code>
 
 | Param | Type | Description |
 | --- | --- | --- |
-| response | <code>communicationData</code> | data from device |
+| response | [<code>communicationData</code>](#communicationData) | data from device |
 
 <br/>
 
@@ -160,24 +161,24 @@ SecuxXRP.resolveTransaction(response, serialized) ⇒ <code>string</code>
 
 | Param | Type | Description |
 | --- | --- | --- |
-| response | <code>communicationData</code> | data from device |
-| serialized | <code>communicationData</code> |  |
+| response | [<code>communicationData</code>](#communicationData) | data from device |
+| serialized | [<code>communicationData</code>](#communicationData) |  |
 
 <br/>
 
-
 ## Types
 
+<a name="communicationData"></a>
 
-<a name="SecuxXRP"></a>
+### communicationData : <code>string</code> \| <code>Buffer</code>
+*Data type for transmission.*
 
-
-
-
+<br/>
 
 <a name="baseObject"></a>
 
-### baseObject
+### baseObject : <code>object</code>
+*The payment object.*
 
 | Name | Type | Description |
 | --- | --- | --- |
@@ -191,14 +192,16 @@ SecuxXRP.resolveTransaction(response, serialized) ⇒ <code>string</code>
 | [Amount] | <code>string</code> \| <code>number</code> |  |
 | [SourceTag] | <code>number</code> |  |
 | [DestinationTag] | <code>number</code> |  |
-
+<br/>
 
 <a name="prepared"></a>
 
-### prepared
+### prepared : <code>object</code>
+*Object for the signing and validation.*
 
 | Name | Type | Description |
 | --- | --- | --- |
 | commandData | <code>commandData</code> | data for sending to device |
 | serialized | <code>commandData</code> |  |
+<br/>
 

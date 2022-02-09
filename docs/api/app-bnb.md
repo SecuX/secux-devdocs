@@ -5,27 +5,13 @@ title: '@secux/app-bnb'
 
 > Binance Chain is a blockchain software system developed by Binance and its community.
 
-## SecuxBNB
+<a name="SecuxBNB"></a>
 
+## SecuxBNB
 BNB package for SecuX device
 
 **Kind**: global class  
 <h2>Properties</h2>
-
-### prepareAddress
-***
-SecuxBNB.prepareAddress ⇒ <code>communicationData</code>
-***
-
-*Prepare data for address generation.*
-
-**Returns**: <code>communicationData</code> - data for sending to device  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| path | <code>string</code> | m/44'/714'/... |
-
-<br/>
 
 ### addressConvert
 ***
@@ -42,6 +28,21 @@ SecuxBNB.addressConvert(publickey) ⇒ <code>string</code>
 
 <br/>
 
+### prepareAddress
+***
+SecuxBNB.prepareAddress(path) ⇒ [<code>communicationData</code>](#communicationData)
+***
+
+*Prepare data for address generation.*
+
+**Returns**: [<code>communicationData</code>](#communicationData) - data for sending to device  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| path | <code>string</code> | m/44'/714'/... |
+
+<br/>
+
 ### resolveAddress
 ***
 SecuxBNB.resolveAddress(response) ⇒ <code>string</code>
@@ -53,18 +54,18 @@ SecuxBNB.resolveAddress(response) ⇒ <code>string</code>
 
 | Param | Type | Description |
 | --- | --- | --- |
-| response | <code>communicationData</code> | data from device |
+| response | [<code>communicationData</code>](#communicationData) | data from device |
 
 <br/>
 
 ### preparePublickey
 ***
-SecuxBNB.preparePublickey(path) ⇒ <code>communicationData</code>
+SecuxBNB.preparePublickey(path) ⇒ [<code>communicationData</code>](#communicationData)
 ***
 
 *Prepare data for secp256k1 publickey.*
 
-**Returns**: <code>communicationData</code> - data for sending to device  
+**Returns**: [<code>communicationData</code>](#communicationData) - data for sending to device  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -83,18 +84,18 @@ SecuxBNB.resolvePublickey(response) ⇒ <code>string</code>
 
 | Param | Type | Description |
 | --- | --- | --- |
-| response | <code>communicationData</code> | data from device |
+| response | [<code>communicationData</code>](#communicationData) | data from device |
 
 <br/>
 
 ### prepareXPublickey
 ***
-SecuxBNB.prepareXPublickey(path) ⇒ <code>communicationData</code>
+SecuxBNB.prepareXPublickey(path) ⇒ [<code>communicationData</code>](#communicationData)
 ***
 
 *Prepare data for xpub.*
 
-**Returns**: <code>communicationData</code> - data for sending to device  
+**Returns**: [<code>communicationData</code>](#communicationData) - data for sending to device  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -113,7 +114,7 @@ SecuxBNB.resolveXPublickey(response, path) ⇒ <code>string</code>
 
 | Param | Type | Description |
 | --- | --- | --- |
-| response | <code>communicationData</code> | data from device |
+| response | [<code>communicationData</code>](#communicationData) | data from device |
 | path | <code>string</code> | m/44'/714'/... |
 
 <br/>
@@ -145,7 +146,7 @@ SecuxBNB.resolveSignature(response) ⇒ <code>string</code>
 
 | Param | Type | Description |
 | --- | --- | --- |
-| response | <code>communicationData</code> | data from device |
+| response | [<code>communicationData</code>](#communicationData) | data from device |
 
 <br/>
 
@@ -160,24 +161,24 @@ SecuxBNB.resolveTransaction(response, serialized) ⇒ <code>string</code>
 
 | Param | Type | Description |
 | --- | --- | --- |
-| response | <code>communicationData</code> | data from device |
-| serialized | <code>communicationData</code> |  |
+| response | [<code>communicationData</code>](#communicationData) | data from device |
+| serialized | [<code>communicationData</code>](#communicationData) |  |
 
 <br/>
 
-
 ## Types
 
+<a name="communicationData"></a>
 
-<a name="SecuxBNB"></a>
+### communicationData : <code>string</code> \| <code>Buffer</code>
+*Data type for transmission.*
 
-
-
-
+<br/>
 
 <a name="txDetail"></a>
 
-### txDetail
+### txDetail : <code>object</code>
+*The payment object.*
 
 | Name | Type | Description |
 | --- | --- | --- |
@@ -188,14 +189,16 @@ SecuxBNB.resolveTransaction(response, serialized) ⇒ <code>string</code>
 | [accountNumber] | <code>number</code> | for replay protection |
 | [sequence] | <code>number</code> | for replay protection |
 | [memo] | <code>string</code> |  |
-
+<br/>
 
 <a name="prepared"></a>
 
-### prepared
+### prepared : <code>object</code>
+*Object for the signing and validation.*
 
 | Name | Type | Description |
 | --- | --- | --- |
-| commandData | <code>communicationData</code> | data for sending to device |
-| serialized | <code>communicationData</code> |  |
+| commandData | [<code>communicationData</code>](#communicationData) | data for sending to device |
+| serialized | [<code>communicationData</code>](#communicationData) |  |
+<br/>
 

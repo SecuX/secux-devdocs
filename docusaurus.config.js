@@ -58,7 +58,7 @@ const config = {
           },
           {
             type: 'doc',
-            docId: 'api/app-btc',
+            docId: 'api/protocol-transaction',
             position: 'left',
             label: 'API',
           },

@@ -5,27 +5,13 @@ title: '@secux/app-xlm'
 
 > Stellar is an open-source network for currencies and payments. Stellar makes it possible to create, send and trade digital representations of all forms of money—dollars, pesos, bitcoin, pretty much anything. It’s designed so all the world’s financial systems can work together on a single network.
 
-## SecuxXLM
+<a name="SecuxXLM"></a>
 
+## SecuxXLM
 XLM package for SecuX device
 
 **Kind**: global class  
 <h2>Properties</h2>
-
-### prepareAddress
-***
-SecuxXLM.prepareAddress ⇒ <code>communicationData</code>
-***
-
-*Prepare data for XLM address.*
-
-**Returns**: <code>communicationData</code> - data for sending to device  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| path | <code>string</code> | BIP32 path (hardened child key), ex: m/44'/148'/0' |
-
-<br/>
 
 ### addressConvert
 ***
@@ -42,6 +28,21 @@ SecuxXLM.addressConvert(publickey) ⇒ <code>string</code>
 
 <br/>
 
+### prepareAddress
+***
+SecuxXLM.prepareAddress(path) ⇒ [<code>communicationData</code>](#communicationData)
+***
+
+*Prepare data for XLM address.*
+
+**Returns**: [<code>communicationData</code>](#communicationData) - data for sending to device  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| path | <code>string</code> | BIP32 path (hardened child key), ex: m/44'/148'/0' |
+
+<br/>
+
 ### resolveAddress
 ***
 SecuxXLM.resolveAddress(response) ⇒ <code>string</code>
@@ -53,18 +54,18 @@ SecuxXLM.resolveAddress(response) ⇒ <code>string</code>
 
 | Param | Type | Description |
 | --- | --- | --- |
-| response | <code>communicationData</code> | data from device |
+| response | [<code>communicationData</code>](#communicationData) | data from device |
 
 <br/>
 
 ### preparePublickey
 ***
-SecuxXLM.preparePublickey(path) ⇒ <code>communicationData</code>
+SecuxXLM.preparePublickey(path) ⇒ [<code>communicationData</code>](#communicationData)
 ***
 
 *Prepare data for ed25519 publickey.*
 
-**Returns**: <code>communicationData</code> - data for sending to device  
+**Returns**: [<code>communicationData</code>](#communicationData) - data for sending to device  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -83,7 +84,7 @@ SecuxXLM.resolvePublickey(response) ⇒ <code>string</code>
 
 | Param | Type | Description |
 | --- | --- | --- |
-| response | <code>communicationData</code> | data from device |
+| response | [<code>communicationData</code>](#communicationData) | data from device |
 
 <br/>
 
@@ -114,7 +115,7 @@ SecuxXLM.resolveSignature(response) ⇒ <code>string</code>
 
 | Param | Type | Description |
 | --- | --- | --- |
-| response | <code>communicationData</code> | data from device |
+| response | [<code>communicationData</code>](#communicationData) | data from device |
 
 <br/>
 
@@ -129,24 +130,24 @@ SecuxXLM.resolveTransaction(response, serialized) ⇒ <code>string</code>
 
 | Param | Type | Description |
 | --- | --- | --- |
-| response | <code>communicationData</code> | data from device |
-| serialized | <code>communicationData</code> | serialized object |
+| response | [<code>communicationData</code>](#communicationData) | data from device |
+| serialized | [<code>communicationData</code>](#communicationData) | serialized object |
 
 <br/>
 
-
 ## Types
 
+<a name="communicationData"></a>
 
-<a name="SecuxXLM"></a>
+### communicationData : <code>string</code> \| <code>Buffer</code>
+*Data type for transmission.*
 
-
-
-
+<br/>
 
 <a name="txDetail"></a>
 
-### txDetail
+### txDetail : <code>object</code>
+*The payment object.*
 
 | Name | Type | Description |
 | --- | --- | --- |
@@ -158,24 +159,27 @@ SecuxXLM.resolveTransaction(response, serialized) ⇒ <code>string</code>
 | [memo] | [<code>memoObj</code>](#memoObj) |  |
 | [networkPassphrase] | <code>string</code> | network for XLM, default is mainnet |
 | [needCreateAccount] | <code>boolean</code> | pay for creating new account, default: false |
-
+<br/>
 
 <a name="memoObj"></a>
 
-### memoObj
+### memoObj : <code>object</code>
+*Memo.*
 
 | Name | Type | Description |
 | --- | --- | --- |
 | Type | <code>string</code> | MemoType |
 | Value | <code>string</code> |  |
-
+<br/>
 
 <a name="prepared"></a>
 
-### prepared
+### prepared : <code>object</code>
+*Object for the signing and validation.*
 
 | Name | Type | Description |
 | --- | --- | --- |
-| commandData | <code>communicationData</code> | data for sending to device |
-| serialized | <code>communicationData</code> | serialized object |
+| commandData | [<code>communicationData</code>](#communicationData) | data for sending to device |
+| serialized | [<code>communicationData</code>](#communicationData) | serialized object |
+<br/>
 
