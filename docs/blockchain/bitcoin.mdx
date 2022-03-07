@@ -170,3 +170,42 @@ function Example(props) {
   );
 }
 ```
+
+### Estimate virtual size
+Transaction fee equals to (virtual size) * (fee per byte). 
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxBTC, CoinType, ScriptType } from "@secux/app-btc";
+
+function Example(props) {
+  const [size, setSize] = useState('');
+
+  async function estimate() {
+    const size = SecuxBTC.getVirtualSize(
+      // inputs
+      [
+        ScriptType.P2PKH,
+        ScriptType.P2WPKH,
+        ScriptType.P2WPKH,
+        ScriptType.P2SH_P2WPKH
+      ],
+
+      // outputs
+      [
+        ScriptType.P2WPKH,
+        ScriptType.P2SH_P2WPKH,
+        ScriptType.P2WPKH,
+      ]
+    )
+
+    setSize(size);
+  }
+
+  return (
+    <div>
+      <Button onClick={estimate}/>
+      <h2>{size}</h2>
+    </div>
+  );
+}
+```

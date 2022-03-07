@@ -1,0 +1,447 @@
+---
+title: Solana (SOL)
+---
+
+This article explains how to use SecuX to trade on Solana.
+
+## Installation
+```bash npm
+npm install @secux/app-sol
+```
+
+## Supported items
+### SPL Token Standard
+[The Solana Program Library](https://spl.solana.com/) (SPL) is a collection of on-chain programs targeting the [Sealevel parallel runtime](https://medium.com/solana-labs/sealevel-parallel-processing-thousands-of-smart-contracts-d814b378192). These programs are tested against Solana's implementation of Sealevel, solana-runtime, and deployed to its mainnet.
+
+SPL Token is the [standard](https://docs.solana.com/integrations/exchange#supporting-the-spl-token-standard) for wrapped/synthetic token creation and exchange on the Solana blockchain.
+
+## Examples
+The following examples will be demonstrated using usb.
+```jsx
+import { SecuxWebUSB } from "@secux/transport-webusb";
+import { SecuxSOL } from "@secux/app-sol";
+
+export async function useSecuX(callback) {
+  const device = await SecuxWebUSB.Create();
+  await device.Connect();
+
+  await callback(device);
+
+  await device.Disconnect();
+}
+```
+
+
+### Generate Address
+The following example is a React playground. Try modifying the BIP-32 path `m/44'/501'/0'` and play with it!
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxSOL } from "@secux/app-sol";
+
+function Example(props) {
+  const [address, setAddress] = useState('');
+
+  async function GenerateAddress(device) {
+    // Modify BIP-32 path to play.
+    const path = "m/44'/501'/0'";
+    const buffer = SecuxSOL.prepareAddress(path);
+    const response = await device.Exchange(buffer);
+    const address = SecuxSOL.resolveAddress(response);
+
+    setAddress(address);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(GenerateAddress)}/>
+      <h2>{address}</h2>
+    </div>
+  );
+}
+```
+
+### Generate Associated Token Address
+The field `mintAccount` is known as Token Address on Solana, you can find them [here](https://solscan.io/tokens).
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxSOL } from "@secux/app-sol";
+
+function Example(props) {
+  const [address, setAddress] = useState('');
+
+  async function GenerateAddress(device) {
+    const path = "m/44'/501'/0'";
+    const buffer = SecuxSOL.prepareAddress(path);
+    const response = await device.Exchange(buffer);
+    const address = SecuxSOL.resolveAddress(response, { mintAccount: "<mint>" });
+
+    setAddress(address);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(GenerateAddress)}/>
+      <h2>{address}</h2>
+    </div>
+  );
+}
+```
+
+### Generate derived Program Address
+[Program addresses](https://docs.solana.com/developing/programming-model/calling-between-programs#hash-based-generated-program-addresses) are deterministically derived from a collection of seeds and a program id using a 256-bit pre-image resistant hash function.
+- `seed`: symbolic keywords used to derive the key.
+- `programId`: program that the address is derived for.
+
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxSOL } from "@secux/app-sol";
+
+function Example(props) {
+  const [address, setAddress] = useState('');
+
+  async function GenerateAddress(device) {
+    const path = "m/44'/501'/0'";
+    const buffer = SecuxSOL.prepareAddress(path);
+    const response = await device.Exchange(buffer);
+    const address = SecuxSOL.resolveAddress(
+      response, 
+      { 
+        seed: "<seed>", 
+        programId: "<programId>" 
+      }
+    );
+
+    setAddress(address);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(GenerateAddress)}/>
+      <h2>{address}</h2>
+    </div>
+  );
+}
+```
+
+### Transfer Asset
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxSOL } from "@secux/app-sol";
+// import * as solanaWeb3 from "@solana/web3.js";
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {
+    const path = "m/44'/501'/0'";
+    const from = await device.getAddress(path);
+
+    // fetch data from solana api
+    const api = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl("mainnet-beta"));
+    const recentBlockhash = (await api.getRecentBlockhash()).blockhash;
+
+    // signing by SecuX
+    const { commandData, serialized } = SecuxSOL.prepareSign(
+      from, // feePayer
+      {
+        recentBlockhash,
+        instructions: [
+          {
+            type: "transfer",
+            params: {
+              from,
+              to: "<Receiving Address>",
+              lamports: 1e9
+            }
+          }
+        ],
+        ownerships: [
+          { path, account: from }
+        ]
+      }
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxSOL.resolveTransaction(response, serialized);
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
+
+### Transfer SPL Token
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxSOL } from "@secux/app-sol";
+// import * as solanaWeb3 from "@solana/web3.js";
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {
+    const path = "m/44'/501'/0'";
+    const from = await device.getAddress(path);
+
+    // fetch data from solana api
+    const api = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl("mainnet-beta"));
+    const recentBlockhash = (await api.getRecentBlockhash()).blockhash;
+
+    // signing by SecuX
+    const { commandData, serialized } = SecuxSOL.prepareSign(
+      from, // feePayer
+      {
+        recentBlockhash,
+        instructions: SecuxSOL.Action.transferToken(
+          {
+            from: "<Account Token Address>",
+            to: "<Receiving Token Address>",
+            owner: from,
+            amount: "1000000",
+            mint: "<mint>",
+            decimal: 6,
+          }
+        ),
+        ownerships: [
+          { path, account: from }
+        ]
+      }
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxSOL.resolveTransaction(response, serialized);
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
+
+### create account and Transfer SPL Token
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxSOL } from "@secux/app-sol";
+// import * as solanaWeb3 from "@solana/web3.js";
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {
+    const path = "m/44'/501'/0'";
+    const from = await device.getAddress(path);
+
+    // fetch data from solana api
+    const api = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl("mainnet-beta"));
+    const recentBlockhash = (await api.getRecentBlockhash()).blockhash;
+
+    // signing by SecuX
+    const { commandData, serialized } = SecuxSOL.prepareSign(
+      from, // feePayer
+      {
+        recentBlockhash,
+        instructions: SecuxSOL.Action.transferToken(
+          {
+            // default is ATA address, it will be generated by parameters
+            // from,
+            to: "<Receiving Account Address>",
+            owner: from,
+            amount: "1000000",
+            mint: "<mint>",
+            decimal: 6,
+            // create ATA account for receiver
+            createAccount: true
+          }
+        ),
+        ownerships: [
+          { path, account: from }
+        ]
+      }
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxSOL.resolveTransaction(response, serialized);
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
+
+### Stake to a pool
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxSOL } from "@secux/app-sol";
+// import * as solanaWeb3 from "@solana/web3.js";
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {
+    const path = "m/44'/501'/0'";
+    const from = await device.getAddress(path);
+
+    // fetch data from solana api
+    const api = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl("mainnet-beta"));
+    const recentBlockhash = (await api.getRecentBlockhash()).blockhash;
+    
+    // signing by SecuX
+    const { commandData, serialized } = SecuxSOL.prepareSign(
+      from, // feePayer
+      {
+        recentBlockhash,
+        instructions: SecuxSOL.Action.stake(
+          {
+            owner: from,
+            stake: "<seed or stake address>",
+            vote: "<pool address>",
+            lamports: 1e9,
+            space: 200
+          }
+        ),
+        ownerships: [
+          { path, account: from }
+        ]
+      }
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxSOL.resolveTransaction(response, serialized);
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
+
+### Unstake
+Deactivate the stake address and withdraw from it. If you want to [close the stake account](https://docs.solana.com/staking/stake-accounts#destroying-a-stake-account), withdraw all account balance.
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxSOL } from "@secux/app-sol";
+// import * as solanaWeb3 from "@solana/web3.js";
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {
+    const path = "m/44'/501'/0'";
+    const from = await device.getAddress(path);
+
+    // fetch data from solana api
+    const api = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl("mainnet-beta"));
+    const recentBlockhash = (await api.getRecentBlockhash()).blockhash;
+    
+    // signing by SecuX
+    const { commandData, serialized } = SecuxSOL.prepareSign(
+      from, // feePayer
+      {
+        recentBlockhash,
+        instructions: SecuxSOL.Action.unstake(
+          {
+            owner: from,
+            stake: "<seed or stake address>",
+            lamports: 1e9
+          }
+        ),
+        ownerships: [
+          { path, account: from }
+        ]
+      }
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxSOL.resolveTransaction(response, serialized);
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
+
+### Compose your instructions
+This sdk use the low-level instruction structure that is similar to [Solana JavaScript SDK](https://github.com/solana-labs/solana-web3.js).
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxSOL } from "@secux/app-sol";
+// import * as solanaWeb3 from "@solana/web3.js";
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {
+    const path = "m/44'/501'/0'";
+    const from = await device.getAddress(path);
+    const to = "<Receiving Address>";
+
+    // fetch data from solana api
+    const api = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl("mainnet-beta"));
+    const recentBlockhash = (await api.getRecentBlockhash()).blockhash;
+
+    // create instructions
+    const transfer = solanaWeb3.SystemProgram.transfer({
+      fromPubkey: new solanaWeb3.PublicKey(from),
+      toPubkey: new solanaWeb3.PublicKey(to),
+      lamports: 1e9
+    });
+
+    const accounts = transfer.keys.map(x => ({
+      ...x,
+      publickey: x.pubkey.toBuffer()
+    }));
+    
+    // signing by SecuX
+    const { commandData, serialized } = SecuxSOL.prepareSign(
+      from, // feePayer
+      {
+        recentBlockhash,
+        instructions: [
+          {
+            programId: transfer.programId.toString(),
+            accounts,
+            data: transfer.data
+          }
+        ],
+        ownerships: [
+          { path, account: from }
+        ]
+      }
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxSOL.resolveTransaction(response, serialized);
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
