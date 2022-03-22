@@ -76,7 +76,7 @@ function Example(props) {
     const path = "m/44'/60'/0'/0/0";
     const buffer = SecuxETH.prepareAddress(path);
     const response = await device.Exchange(buffer);
-    const address = SecuxETH.resolveAddress(response, path);
+    const address = SecuxETH.resolveAddress(response);
 
     setAddress(address);
   }
