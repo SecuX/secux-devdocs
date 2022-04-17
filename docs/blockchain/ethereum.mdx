@@ -247,6 +247,129 @@ function Example(props) {
 }
 ```
 
+### Transfer ERC-1155 Single Token (EIP-1559)
+The following abi funciton calls are available:
+- SecuxETH.ERC721.prepareTransferFrom()
+- SecuxETH.ERC721.prepareSafeTransferFrom()
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxETH } from "@secux/app-eth";
+// import { ethers } from "ethers";
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {
+    const path = "m/44'/60'/0'/0/0";
+    const fromAddress = await device.getAddress(path);
+
+    // fetch data from etherscan api
+    const api = new ethers.providers.EtherscanProvider("rinkeby");
+    const nonce = await api.getTransactionCount(fromAddress);
+    const feeData = await api.getFeeData();
+
+    // signing by SecuX
+    const { commandData, rawTx } = SecuxETH.ERC1155.prepareSafeTransferFrom(
+      path,
+      {
+        nonce,
+        to: "<Contract Address>",
+        value: 0,
+        chainId: 3,
+        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas.toHexString(),
+        maxFeePerGas: feeData.maxFeePerGas.toHexString(),
+        gasLimit: 50000,
+      },
+      {
+        fromAddress,
+        toAddress: "<Receiving Address>",
+        id: "<Token Id>",
+        value: "<Amount>",
+        // give a value if needed
+        // data: "<Arbitrary Hex String>"
+      }
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxETH.resolveTransaction(response, rawTx);
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
+
+### Transfer ERC-1155 Multi-Token (EIP-1559)
+The following abi funciton calls are available:
+- SecuxETH.ERC721.prepareTransferFrom()
+- SecuxETH.ERC721.prepareSafeTransferFrom()
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxETH } from "@secux/app-eth";
+// import { ethers } from "ethers";
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {
+    const path = "m/44'/60'/0'/0/0";
+    const fromAddress = await device.getAddress(path);
+
+    // fetch data from etherscan api
+    const api = new ethers.providers.EtherscanProvider("rinkeby");
+    const nonce = await api.getTransactionCount(fromAddress);
+    const feeData = await api.getFeeData();
+
+    // signing by SecuX
+    const { commandData, rawTx } = SecuxETH.ERC1155.prepareSafeBatchTransferFrom(
+      path,
+      {
+        nonce,
+        to: "<Contract Address>",
+        value: 0,
+        chainId: 3,
+        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas.toHexString(),
+        maxFeePerGas: feeData.maxFeePerGas.toHexString(),
+        gasLimit: 50000,
+      },
+      {
+        fromAddress,
+        toAddress: "<Receiving Address>",
+        items: [
+          {
+            id: "<Token Id>",
+            value: "<Amount>"
+          },
+          {
+            id: "<Token Id>",
+            value: "<Amount>"
+          },
+          // ...
+        ],
+        // give a value if needed
+        // data: "<Arbitrary Hex String>"
+      }
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxETH.resolveTransaction(response, rawTx);
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
+
 ### Transfer Asset (EIP-155)
 ```jsx live
 // We cannot import packages in live editor, please uncomment it for use.
@@ -377,6 +500,121 @@ function Example(props) {
         fromAddress,
         toAddress: "<Receiving Address>",
         tokenId: "<Token Id>"
+      }
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxETH.resolveTransaction(response, rawTx);
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
+
+### Transfer ERC-1155 Single Token (EIP-155)
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxETH } from "@secux/app-eth";
+// import { ethers } from "ethers";
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {    
+    const path = "m/44'/60'/0'/0/0";
+    const fromAddress = await device.getAddress(path);
+
+    // fetch data from etherscan api
+    const api = new ethers.providers.EtherscanProvider("rinkeby");
+    const nonce = await api.getTransactionCount(fromAddress);
+    const feeData = await api.getFeeData();
+  
+    // signing by SecuX
+    const { commandData, rawTx } = SecuxETH.ERC1155.prepareSafeTransferFrom(
+      path,
+      {
+        nonce,
+        to: "<Contract Address>",
+        value: 0,
+        chainId: 3,
+        gasPrice: feeData.gasPrice.toHexString(),
+        gasLimit: 50000,
+      },
+      {
+        fromAddress,
+        toAddress: "<Receiving Address>",
+        id: "<Token Id>",
+        value: "<Amount>",
+        // give a value if needed
+        // data: "<Arbitrary Hex String>"
+      }
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxETH.resolveTransaction(response, rawTx);
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
+
+### Transfer ERC-1155 Multi-Token (EIP-155)
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxETH } from "@secux/app-eth";
+// import { ethers } from "ethers";
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {    
+    const path = "m/44'/60'/0'/0/0";
+    const fromAddress = await device.getAddress(path);
+
+    // fetch data from etherscan api
+    const api = new ethers.providers.EtherscanProvider("rinkeby");
+    const nonce = await api.getTransactionCount(fromAddress);
+    const feeData = await api.getFeeData();
+  
+    // signing by SecuX
+    const { commandData, rawTx } = SecuxETH.ERC1155.prepareSafeBatchTransferFrom(
+      path,
+      {
+        nonce,
+        to: "<Contract Address>",
+        value: 0,
+        chainId: 3,
+        gasPrice: feeData.gasPrice.toHexString(),
+        gasLimit: 50000,
+      },
+      {
+        fromAddress,
+        toAddress: "<Receiving Address>",
+        items: [
+          {
+            id: "<Token Id>",
+            value: "<Amount>"
+          },
+          {
+            id: "<Token Id>",
+            value: "<Amount>"
+          },
+          // ...
+        ],
+        // give a value if needed
+        // data: "<Arbitrary Hex String>"
       }
     );
     const response = await device.Exchange(commandData);
