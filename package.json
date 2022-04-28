@@ -30,6 +30,7 @@
     "@secux/app-xrp": "^3.0.3",
     "@secux/transport-webble": "^3.1.1",
     "@secux/transport-webusb": "^3.1.1",
+    "@solana/web3.js": "^1.36.0",
     "axios": "^0.25.0",
     "clsx": "^1.1.1",
     "ethers": "^5.5.3",
