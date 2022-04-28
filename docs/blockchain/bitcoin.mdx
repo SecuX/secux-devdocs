@@ -132,7 +132,7 @@ function Example(props) {
     }
 
     // signing by SecuX
-    const { commandData, rawTx } = SecuxBTC.prepareSign(
+    const { commands, rawTx } = SecuxBTC.prepareSign(
       inputs,
       {
         to: {
@@ -152,11 +152,17 @@ function Example(props) {
         feeRate: fee.fastestFee
       }
     );
-    const response = await device.Exchange(commandData);
+    const responseList = [];
+    for (const cmd of commands) {
+      const response = await device.Exchange(cmd);
+      responseList.push(response);
+    }
     const signedTx = SecuxBTC.resolveTransaction(
-      response, 
-      rawTx, 
-      inputs.map(txIn => txIn.publickey)
+      responseList, 
+      {
+        rawTx,
+        publickeys: inputs.map(txIn => txIn.publickey),
+      }
     );
 
     setTransaction(signedTx);

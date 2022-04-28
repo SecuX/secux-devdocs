@@ -156,7 +156,7 @@ SecuxBTC.resolveSignatureList(response) ⇒ <code>Array&lt;string&gt;</code>
 
 ### resolveTransaction
 ***
-SecuxBTC.resolveTransaction(response, unsigned, publickeys, [coin]) ⇒ <code>string</code>
+SecuxBTC.resolveTransaction(response, params) ⇒ <code>string</code>
 ***
 
 *Serialize transaction wtih signature for broadcasting.*
@@ -165,10 +165,8 @@ SecuxBTC.resolveTransaction(response, unsigned, publickeys, [coin]) ⇒ <code>st
 
 | Param | Type | Description |
 | --- | --- | --- |
-| response | [<code>communicationData</code>](#communicationData) | data from device |
-| unsigned | <code>string</code> | unsigned raw transaction |
-| publickeys | [<code>Array&lt;communicationData&gt;</code>](#communicationData) | secp256k1 publickey correspond to each input |
-| [coin] | [<code>CoinType</code>](#CoinType) | default: CoinType.BITCOIN |
+| response | [<code>communicationData</code>](#communicationData) \| [<code>Array&lt;communicationData&gt;</code>](#communicationData) | data from device |
+| params | [<code>TransactionObject</code>](#TransactionObject) |  |
 
 <br/>
 
@@ -340,5 +338,17 @@ SecuxBTC.getVirtualSize(inputs, outputs) ⇒ <code>number</code>
 | --- | --- | --- |
 | commandData | [<code>communicationData</code>](#communicationData) | data for sending to device |
 | rawTx | <code>string</code> | unsigned raw transaction |
+<br/>
+
+<a name="TransactionObject"></a>
+
+### TransactionObject : <code>object</code>
+*Paramters for finalizing transaction.*
+
+| Name | Type | Description |
+| --- | --- | --- |
+| rawTx | <code>string</code> | unsigned raw transaction |
+| publickeys | <code>Array&lt;(string\|Buffer)&gt;</code> | publickey correspond to each input |
+| [coin] | [<code>CoinType</code>](#CoinType) |  |
 <br/>
 
