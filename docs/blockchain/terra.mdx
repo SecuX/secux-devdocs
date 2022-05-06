@@ -1,0 +1,175 @@
+---
+title: Terra (LUNA)
+---
+
+This article explains how to use SecuX to trade on Terra.
+
+## Installation
+```bash npm
+npm install @secux/app-luna
+```
+
+## Examples
+The following examples will be demonstrated using usb.
+```jsx
+import { SecuxWebUSB } from "@secux/transport-webusb";
+import { SecuxLUNA } from "@secux/app-luna";
+
+export async function useSecuX(callback) {
+  const device = await SecuxWebUSB.Create();
+  await device.Connect();
+
+  await callback(device);
+
+  await device.Disconnect();
+}
+```
+
+
+### Generate Account Address
+The following example is a React playground. Try modifying path `m/44'/330'/0'/0/0` and play with it!
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxLUNA } from "@secux/app-luna";
+
+function Example(props) {
+  const [address, setAddress] = useState('');
+
+  async function GenerateAddress(device) {
+    // Modify BIP-32 path to play.
+    const path = "m/44'/330'/0'/0/0";
+    const buffer = SecuxLUNA.prepareAddress(path);
+    const response = await device.Exchange(buffer);
+    const address = SecuxLUNA.resolveAddress(response);
+
+    setAddress(address);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(GenerateAddress)}/>
+      <h2>{address}</h2>
+    </div>
+  );
+}
+```
+
+### Generate Validator Address
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxLUNA } from "@secux/app-luna";
+
+function Example(props) {
+  const [address, setAddress] = useState('');
+
+  async function GenerateAddress(device) {
+    // Modify BIP-32 path to play.
+    const path = "m/44'/330'/0'/0/0";
+    const buffer = SecuxLUNA.prepareAddress(path);
+    const response = await device.Exchange(buffer);
+    const address = SecuxLUNA.resolveAddress(
+      response, 
+      SecuxLUNA.AddressType.validator
+    );
+
+    setAddress(address);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(GenerateAddress)}/>
+      <h2>{address}</h2>
+    </div>
+  );
+}
+```
+
+### Generate Pubkey Address
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxLUNA } from "@secux/app-luna";
+
+function Example(props) {
+  const [address, setAddress] = useState('');
+
+  async function GenerateAddress(device) {
+    // Modify BIP-32 path to play.
+    const path = "m/44'/330'/0'/0/0";
+    const buffer = SecuxLUNA.prepareAddress(path);
+    const response = await device.Exchange(buffer);
+    const address = SecuxLUNA.resolveAddress(
+      response, 
+      SecuxLUNA.AddressType.pubkey
+    );
+
+    setAddress(address);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(GenerateAddress)}/>
+      <h2>{address}</h2>
+    </div>
+  );
+}
+```
+
+<!---
+### Transfer Asset
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxLUNA } from "@secux/app-luna";
+// import axios from "axios";
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {
+    const path = "m/44'/330'/0'/0/0";
+    const publickey = await device.getPublickey(path);
+    const fromAddress = SecuxLUNA.addressConvert(publickey);
+
+    // fetch data from terra api
+    const api = axios.create({
+      baseURL: "https://bombay-lcd.terra.dev",
+    });
+    const utxos = (await api.get(`/cosmos/auth/v1beta1/accounts/${fromAddress}`)).data;
+
+    const inputs = utxos.map(utxo => (
+      {
+        path,
+        txId: utxo.tx_hash,
+        index: utxo.output_index,
+        amount: utxo.amount[0].quantity,
+        xpublickey
+      }
+    ));
+
+    // signing by SecuX
+    const { commandData, serialized } = SecuxADA.prepareSign(
+      inputs,
+      {
+        address: "<Receiving Address>",
+        amount: 1e6
+      },
+      {
+        changeAddress: fromAddress,
+        // or determine transaction fee you want to consume
+        // fee: 2e5
+      }
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxADA.resolveTransaction(response, serialized);
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
+-->

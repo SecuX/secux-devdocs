@@ -161,7 +161,7 @@ function Example(props) {
     const feeData = await api.getFeeData();
 
     // signing by SecuX
-    const { commandData, rawTx } = SecuxETH.ERC20.prepareTransferFrom(
+    const { commandData, rawTx } = SecuxETH.ERC20.prepareTransfer(
       path,
       {
         nonce,
@@ -173,7 +173,6 @@ function Example(props) {
         gasLimit: 30000,
       },
       {
-        fromAddress,
         toAddress: "<Receiving Address>",
         amount: `0x${1e18.toString(16)}`
       }
@@ -436,7 +435,7 @@ function Example(props) {
     const feeData = await api.getFeeData();
 
     // signing by SecuX
-    const { commandData, rawTx } = SecuxETH.ERC20.prepareTransferFrom(
+    const { commandData, rawTx } = SecuxETH.ERC20.prepareTransfer(
       path,
       {
         nonce,
@@ -447,7 +446,6 @@ function Example(props) {
         gasLimit: 30000,
       },
       {
-        fromAddress,
         toAddress: "<Receiving Address>",
         amount: `0x${1e18.toString(16)}`
       }
