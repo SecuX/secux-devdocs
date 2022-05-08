@@ -114,7 +114,6 @@ function Example(props) {
 }
 ```
 
-<!---
 ### Transfer Asset
 ```jsx live
 // We cannot import packages in live editor, please uncomment it for use.
@@ -127,35 +126,50 @@ function Example(props) {
   async function MakeTransaction(device) {
     const path = "m/44'/330'/0'/0/0";
     const publickey = await device.getPublickey(path);
-    const fromAddress = SecuxLUNA.addressConvert(publickey);
-
+    const from = SecuxLUNA.addressConvert(publickey);
+    
     // fetch data from terra api
     const api = axios.create({
       baseURL: "https://bombay-lcd.terra.dev",
     });
-    const utxos = (await api.get(`/cosmos/auth/v1beta1/accounts/${fromAddress}`)).data;
+    const { account } = (await api.get(
+      `/cosmos/auth/v1beta1/accounts/${from}`
+    )).data;
+    const gas_price = (await axios(
+      "https://bombay-fcd.terra.dev/v1/txs/gas_prices"
+    )).data;
 
-    const inputs = utxos.map(utxo => (
+    // estimate transaction fee
+    const signer = {
+      path,
+      accountNumber: account.account_number,
+      sequence: account.sequence,
+      publickey,
+    };
+    const send = new SecuxLUNA.MsdSend(
+      from,
+      "<Receiving Address>",
+      { uluna: "<Amount>" }
+    );
+    const tx_bytes = SecuxLUNA.simulate([signer], [send]);
+    const { gas_info: { gas_used } } = (await api.post(
+      "/cosmos/tx/v1beta1/simulate",
       {
-        path,
-        txId: utxo.tx_hash,
-        index: utxo.output_index,
-        amount: utxo.amount[0].quantity,
-        xpublickey
+        tx_bytes,
       }
-    ));
+    )).data;
+
+    // default gas adjustment is 1.75
+    const gasLimit = Math.ceil(gas_used * 1.75);
 
     // signing by SecuX
-    const { commandData, serialized } = SecuxADA.prepareSign(
-      inputs,
+    const { commands, serialized } = SecuxLUNA.prepareSign(
+      [signer],
+      [send],
       {
-        address: "<Receiving Address>",
-        amount: 1e6
-      },
-      {
-        changeAddress: fromAddress,
-        // or determine transaction fee you want to consume
-        // fee: 2e5
+        // you can change uusd to other coins
+        fee: { uusd: gas_price.uusd * gasLimit },
+        gasLimit,
       }
     );
     const response = await device.Exchange(commandData);
@@ -172,4 +186,3 @@ function Example(props) {
   );
 }
 ```
--->
