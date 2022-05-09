@@ -9,6 +9,12 @@ This article explains how to use SecuX to trade on Terra.
 npm install @secux/app-luna
 ```
 
+## Built-in Message Type
+This package supports the following modules, under namespace `SecuxLUNA`.
+- MsgSend
+- MsgExecuteContract
+- MsgDelegate, MsgWithdrawDelegatorReward, MsgUndelegate, MsgBeginRedelegate
+
 ## Examples
 The following examples will be demonstrated using usb.
 ```jsx
@@ -146,7 +152,7 @@ function Example(props) {
       sequence: account.sequence,
       publickey,
     };
-    const send = new SecuxLUNA.MsdSend(
+    const send = new SecuxLUNA.MsgSend(
       from,
       "<Receiving Address>",
       { uluna: "<Amount>" }
@@ -166,6 +172,457 @@ function Example(props) {
     const { commands, serialized } = SecuxLUNA.prepareSign(
       [signer],
       [send],
+      {
+        // you can change uusd to other coins
+        fee: { uusd: gas_price.uusd * gasLimit },
+        gasLimit,
+      }
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxADA.resolveTransaction(response, serialized);
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
+
+### Transfer CW-20 Token
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxLUNA } from "@secux/app-luna";
+// import axios from "axios";
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {
+    const path = "m/44'/330'/0'/0/0";
+    const publickey = await device.getPublickey(path);
+    const from = SecuxLUNA.addressConvert(publickey);
+    
+    // fetch data from terra api
+    const api = axios.create({
+      baseURL: "https://bombay-lcd.terra.dev",
+    });
+    const { account } = (await api.get(
+      `/cosmos/auth/v1beta1/accounts/${from}`
+    )).data;
+    const gas_price = (await axios(
+      "https://bombay-fcd.terra.dev/v1/txs/gas_prices"
+    )).data;
+
+    // estimate transaction fee
+    const signer = {
+      path,
+      accountNumber: account.account_number,
+      sequence: account.sequence,
+      publickey,
+    };
+    const msg = new SecuxLUNA.CW20.transfer(
+      "<Contract Address>",
+      {
+        from,
+        to: "<Receiving Address>",
+        amount: "<Amount>",
+      },
+    );
+    const tx_bytes = SecuxLUNA.simulate([signer], [msg]);
+    const { gas_info: { gas_used } } = (await api.post(
+      "/cosmos/tx/v1beta1/simulate",
+      {
+        tx_bytes,
+      }
+    )).data;
+
+    // default gas adjustment is 1.75
+    const gasLimit = Math.ceil(gas_used * 1.75);
+
+    // signing by SecuX
+    const { commands, serialized } = SecuxLUNA.prepareSign(
+      [signer],
+      [msg],
+      {
+        // you can change uusd to other coins
+        fee: { uusd: gas_price.uusd * gasLimit },
+        gasLimit,
+      }
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxADA.resolveTransaction(response, serialized);
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
+
+### Execute Contract
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxLUNA } from "@secux/app-luna";
+// import axios from "axios";
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {
+    const path = "m/44'/330'/0'/0/0";
+    const publickey = await device.getPublickey(path);
+    const from = SecuxLUNA.addressConvert(publickey);
+    
+    // fetch data from terra api
+    const api = axios.create({
+      baseURL: "https://bombay-lcd.terra.dev",
+    });
+    const { account } = (await api.get(
+      `/cosmos/auth/v1beta1/accounts/${from}`
+    )).data;
+    const gas_price = (await axios(
+      "https://bombay-fcd.terra.dev/v1/txs/gas_prices"
+    )).data;
+
+    // estimate transaction fee
+    const signer = {
+      path,
+      accountNumber: account.account_number,
+      sequence: account.sequence,
+      publickey,
+    };
+    const swap = new SecuxLUNA.MsgExecuteContract(
+      from,
+      "<Contract Address>",
+      {
+        swap: {
+          offer_asset: {
+            amount: "<Amount>",
+            info: {
+              native_token: { denom: "uluna" },
+            },
+          },
+        },
+      },
+      { uluna: "<Amount>" }
+    );
+    const tx_bytes = SecuxLUNA.simulate([signer], [swap]);
+    const { gas_info: { gas_used } } = (await api.post(
+      "/cosmos/tx/v1beta1/simulate",
+      {
+        tx_bytes,
+      }
+    )).data;
+
+    // default gas adjustment is 1.75
+    const gasLimit = Math.ceil(gas_used * 1.75);
+
+    // signing by SecuX
+    const { commands, serialized } = SecuxLUNA.prepareSign(
+      [signer],
+      [swap],
+      {
+        // you can change uusd to other coins
+        fee: { uusd: gas_price.uusd * gasLimit },
+        gasLimit,
+      }
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxADA.resolveTransaction(response, serialized);
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
+
+### Delegate to a validator
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxLUNA } from "@secux/app-luna";
+// import axios from "axios";
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {
+    const path = "m/44'/330'/0'/0/0";
+    const publickey = await device.getPublickey(path);
+    const from = SecuxLUNA.addressConvert(publickey);
+    
+    // fetch data from terra api
+    const api = axios.create({
+      baseURL: "https://bombay-lcd.terra.dev",
+    });
+    const { account } = (await api.get(
+      `/cosmos/auth/v1beta1/accounts/${from}`
+    )).data;
+    const gas_price = (await axios(
+      "https://bombay-fcd.terra.dev/v1/txs/gas_prices"
+    )).data;
+
+    // estimate transaction fee
+    const signer = {
+      path,
+      accountNumber: account.account_number,
+      sequence: account.sequence,
+      publickey,
+    };
+    const delegate = new SecuxLUNA.MsgDelegate(
+      from,
+      "<Validator Address>",
+      "<Amount>"
+    );
+    const tx_bytes = SecuxLUNA.simulate([signer], [delegate]);
+    const { gas_info: { gas_used } } = (await api.post(
+      "/cosmos/tx/v1beta1/simulate",
+      {
+        tx_bytes,
+      }
+    )).data;
+
+    // default gas adjustment is 1.75
+    const gasLimit = Math.ceil(gas_used * 1.75);
+
+    // signing by SecuX
+    const { commands, serialized } = SecuxLUNA.prepareSign(
+      [signer],
+      [delegate],
+      {
+        // you can change uusd to other coins
+        fee: { uusd: gas_price.uusd * gasLimit },
+        gasLimit,
+      }
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxADA.resolveTransaction(response, serialized);
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
+
+### Withdraw rewards
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxLUNA } from "@secux/app-luna";
+// import axios from "axios";
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {
+    const path = "m/44'/330'/0'/0/0";
+    const publickey = await device.getPublickey(path);
+    const from = SecuxLUNA.addressConvert(publickey);
+    
+    // fetch data from terra api
+    const api = axios.create({
+      baseURL: "https://bombay-lcd.terra.dev",
+    });
+    const { account } = (await api.get(
+      `/cosmos/auth/v1beta1/accounts/${from}`
+    )).data;
+    const gas_price = (await axios(
+      "https://bombay-fcd.terra.dev/v1/txs/gas_prices"
+    )).data;
+
+    // estimate transaction fee
+    const signer = {
+      path,
+      accountNumber: account.account_number,
+      sequence: account.sequence,
+      publickey,
+    };
+    const withdraw = new SecuxLUNA.MsgWithdrawDelegatorReward(
+      from,
+      "<Validator Address>"
+    );
+    const tx_bytes = SecuxLUNA.simulate([signer], [withdraw]);
+    const { gas_info: { gas_used } } = (await api.post(
+      "/cosmos/tx/v1beta1/simulate",
+      {
+        tx_bytes,
+      }
+    )).data;
+
+    // default gas adjustment is 1.75
+    const gasLimit = Math.ceil(gas_used * 1.75);
+
+    // signing by SecuX
+    const { commands, serialized } = SecuxLUNA.prepareSign(
+      [signer],
+      [withdraw],
+      {
+        // you can change uusd to other coins
+        fee: { uusd: gas_price.uusd * gasLimit },
+        gasLimit,
+      }
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxADA.resolveTransaction(response, serialized);
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
+
+### Undelegate
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxLUNA } from "@secux/app-luna";
+// import axios from "axios";
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {
+    const path = "m/44'/330'/0'/0/0";
+    const publickey = await device.getPublickey(path);
+    const from = SecuxLUNA.addressConvert(publickey);
+    
+    // fetch data from terra api
+    const api = axios.create({
+      baseURL: "https://bombay-lcd.terra.dev",
+    });
+    const { account } = (await api.get(
+      `/cosmos/auth/v1beta1/accounts/${from}`
+    )).data;
+    const gas_price = (await axios(
+      "https://bombay-fcd.terra.dev/v1/txs/gas_prices"
+    )).data;
+
+    // estimate transaction fee
+    const signer = {
+      path,
+      accountNumber: account.account_number,
+      sequence: account.sequence,
+      publickey,
+    };
+    const undelegate = new SecuxLUNA.MsgUndelegate(
+      from,
+      "<Validator Address>",
+      "<Amount>"
+    );
+    const tx_bytes = SecuxLUNA.simulate([signer], [undelegate]);
+    const { gas_info: { gas_used } } = (await api.post(
+      "/cosmos/tx/v1beta1/simulate",
+      {
+        tx_bytes,
+      }
+    )).data;
+
+    // default gas adjustment is 1.75
+    const gasLimit = Math.ceil(gas_used * 1.75);
+
+    // signing by SecuX
+    const { commands, serialized } = SecuxLUNA.prepareSign(
+      [signer],
+      [undelegate],
+      {
+        // you can change uusd to other coins
+        fee: { uusd: gas_price.uusd * gasLimit },
+        gasLimit,
+      }
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxADA.resolveTransaction(response, serialized);
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
+
+### Redelegate to another validator
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxLUNA } from "@secux/app-luna";
+// import axios from "axios";
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {
+    const path = "m/44'/330'/0'/0/0";
+    const publickey = await device.getPublickey(path);
+    const from = SecuxLUNA.addressConvert(publickey);
+    
+    // fetch data from terra api
+    const api = axios.create({
+      baseURL: "https://bombay-lcd.terra.dev",
+    });
+    const { account } = (await api.get(
+      `/cosmos/auth/v1beta1/accounts/${from}`
+    )).data;
+    const gas_price = (await axios(
+      "https://bombay-fcd.terra.dev/v1/txs/gas_prices"
+    )).data;
+
+    // estimate transaction fee
+    const signer = {
+      path,
+      accountNumber: account.account_number,
+      sequence: account.sequence,
+      publickey,
+    };
+    const redelegate = new SecuxLUNA.MsgBeginRedelegate(
+      from,
+      "<Validator Address>",
+      "<Another Validator Address>",
+      "<Amount>"
+    );
+    const tx_bytes = SecuxLUNA.simulate([signer], [redelegate]);
+    const { gas_info: { gas_used } } = (await api.post(
+      "/cosmos/tx/v1beta1/simulate",
+      {
+        tx_bytes,
+      }
+    )).data;
+
+    // default gas adjustment is 1.75
+    const gasLimit = Math.ceil(gas_used * 1.75);
+
+    // signing by SecuX
+    const { commands, serialized } = SecuxLUNA.prepareSign(
+      [signer],
+      [redelegate],
       {
         // you can change uusd to other coins
         fee: { uusd: gas_price.uusd * gasLimit },
