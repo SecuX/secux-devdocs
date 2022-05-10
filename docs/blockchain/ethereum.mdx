@@ -648,7 +648,7 @@ function Example(props) {
     const response = await device.Exchange(commandData);
     const signature = SecuxETH.resolveSignatureEIP155(response);
 
-    setSignature(signature);
+    setSignature(`0x${signature}`);
   }
 
   return (
@@ -691,7 +691,7 @@ function Example(props) {
     const response = await device.Exchange(commandData);
     const signature = SecuxETH.resolveSignatureEIP155(response);
 
-    setSignature(signature);
+    setSignature(`0x${signature}`);
   }
 
   return (
