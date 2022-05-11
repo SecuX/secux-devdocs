@@ -126,7 +126,7 @@ function Example(props) {
           vout: unspent.vout,
           satoshis: unspent.value,
           path,
-          publickey 
+          publickey
         });
       }
     }
@@ -150,7 +150,9 @@ function Example(props) {
         // If you specify a feeRate, the transaction fee will be optimized.
         // The fee premium will be contributed to receiver,
         // or your change account if you specify utxo.
-        feeRate: fee.fastestFee
+        feeRate: fee.fastestFee,
+        // make a Replace-By-Fee transaction
+        isRBF: true
       }
     );
     const responseList = [];

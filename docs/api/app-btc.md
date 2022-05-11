@@ -327,6 +327,7 @@ SecuxBTC.getVirtualSize(inputs, outputs) ⇒ <code>number</code>
 | --- | --- | --- |
 | [coin] | [<code>CoinType</code>](#CoinType) | check cointype for each input |
 | [feeRate] | <code>number</code> | calculate optimal transaction fee and replace it |
+| [isRBF] | <code>boolean</code> | make Replace-by-Fee transaction |
 <br/>
 
 <a name="prepared"></a>
