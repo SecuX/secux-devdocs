@@ -31,7 +31,9 @@ import * as xrpl from "xrpl";
 import * as trxLib from "@secux/app-trx";
 const TronWeb = require("tronweb");
 import * as xlmLib from "@secux/app-xlm";
+import * as solLib from "@secux/app-sol";
 const solanaWeb3 = require("@solana/web3.js");
+import * as lunaLib from "@secux/app-luna";
 import axios from "axios";
 
 
@@ -58,7 +60,9 @@ const ReactLiveScope = {
     ...trxLib,
     TronWeb,
     ...xlmLib,
+    ...solLib,
     solanaWeb3,
+    ...lunaLib,
     axios
 };
 
