@@ -702,3 +702,34 @@ function Example(props) {
   );
 }
 ```
+
+### Sign Transaction
+Sign with serialized transaction.
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxETH } from "@secux/app-eth";
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {
+    const path = "m/44'/60'/0'/0/0";
+    const tx = Buffer.alloc();
+    const commandData = SecuxETH.prepareSignSerialized(
+      path,
+      tx
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxETH.resolveTransaction(response, tx);
+
+    setTransaction(signedTx);
+  }
+
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
