@@ -16,21 +16,6 @@ npm install @secux/app-sol
 SPL Token is the [standard](https://docs.solana.com/integrations/exchange#supporting-the-spl-token-standard) for wrapped/synthetic token creation and exchange on the Solana blockchain.
 
 ## Examples
-The following examples will be demonstrated using usb.
-```jsx
-import { SecuxWebUSB } from "@secux/transport-webusb";
-import { SecuxSOL } from "@secux/app-sol";
-
-export async function useSecuX(callback) {
-  const device = await SecuxWebUSB.Create();
-  await device.Connect();
-
-  await callback(device);
-
-  await device.Disconnect();
-}
-```
-
 
 ### Generate Address
 The following example is a React playground. Try modifying the BIP-32 path `m/44'/501'/0'` and play with it!
@@ -42,7 +27,7 @@ function Example(props) {
   const [address, setAddress] = useState('');
 
   async function GenerateAddress(device) {
-    // Modify BIP-32 path to play.
+    // set BIP-32 path for Solana.
     const path = "m/44'/501'/0'";
     const buffer = SecuxSOL.prepareAddress(path);
     const response = await device.Exchange(buffer);
@@ -51,9 +36,11 @@ function Example(props) {
     setAddress(address);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(GenerateAddress)}/>
+      <Button onClick={() => useSecuX(GenerateAddress, "ble")}/>
       <h2>{address}</h2>
     </div>
   );
@@ -70,17 +57,23 @@ function Example(props) {
   const [address, setAddress] = useState('');
 
   async function GenerateAddress(device) {
+    // set BIP-32 path for Solana.
     const path = "m/44'/501'/0'";
+    // set spl token mint address.
+    const mint = "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB";
+
     const buffer = SecuxSOL.prepareAddress(path);
     const response = await device.Exchange(buffer);
-    const address = SecuxSOL.resolveAddress(response, { mintAccount: "<mint>" });
+    const address = SecuxSOL.resolveAddress(response, { mintAccount: mint });
 
     setAddress(address);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(GenerateAddress)}/>
+      <Button onClick={() => useSecuX(GenerateAddress, "ble")}/>
       <h2>{address}</h2>
     </div>
   );
@@ -100,6 +93,7 @@ function Example(props) {
   const [address, setAddress] = useState('');
 
   async function GenerateAddress(device) {
+    // set BIP-32 path for Solana.
     const path = "m/44'/501'/0'";
     const buffer = SecuxSOL.prepareAddress(path);
     const response = await device.Exchange(buffer);
@@ -107,16 +101,18 @@ function Example(props) {
       response, 
       { 
         seed: "<seed>", 
-        programId: "<programId>" 
+        programId: "11111111111111111111111111111111" 
       }
     );
 
     setAddress(address);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(GenerateAddress)}/>
+      <Button onClick={() => useSecuX(GenerateAddress, "ble")}/>
       <h2>{address}</h2>
     </div>
   );
@@ -133,6 +129,7 @@ function Example(props) {
   const [tranasction, setTransaction] = useState('');
 
   async function MakeTransaction(device) {
+    // set BIP-32 path for Solana.
     const path = "m/44'/501'/0'";
     const from = await device.getAddress(path);
 
@@ -140,7 +137,7 @@ function Example(props) {
     const api = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl("mainnet-beta"));
     const recentBlockhash = (await api.getRecentBlockhash()).blockhash;
 
-    // signing by SecuX
+    // ------------------------- signing by SecuX -------------------------
     const { commandData, serialized } = SecuxSOL.prepareSign(
       from, // feePayer
       {
@@ -150,8 +147,8 @@ function Example(props) {
             type: "transfer",
             params: {
               from,
-              to: "<Receiving Address>",
-              lamports: 1e9
+              to: "GjJyeC1r2RgkuoCWMyPYkCWSGSGLcz266EaAkLA27AhL",  // recipient
+              lamports: 1e9  // SOL amount
             }
           }
         ],
@@ -162,13 +159,16 @@ function Example(props) {
     );
     const response = await device.Exchange(commandData);
     const signedTx = SecuxSOL.resolveTransaction(response, serialized);
+    // --------------------------------------------------------------------
 
     setTransaction(signedTx);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <Button onClick={() => useSecuX(MakeTransaction, "ble")}/>
       <h2>{tranasction}</h2>
     </div>
   );
@@ -185,26 +185,31 @@ function Example(props) {
   const [tranasction, setTransaction] = useState('');
 
   async function MakeTransaction(device) {
+    // set BIP-32 path for Solana.
     const path = "m/44'/501'/0'";
     const from = await device.getAddress(path);
+    // set spl token mint address.
+    const mint = "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB";
+    const tokenAddress = await device.getAddress(path, { mintAccount: mint });
 
     // fetch data from solana api
     const api = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl("mainnet-beta"));
     const recentBlockhash = (await api.getRecentBlockhash()).blockhash;
 
-    // signing by SecuX
+    // ------------------------- signing by SecuX -------------------------
     const { commandData, serialized } = SecuxSOL.prepareSign(
       from, // feePayer
       {
         recentBlockhash,
         instructions: SecuxSOL.Action.transferToken(
           {
-            from: "<Account Token Address>",
-            to: "<Receiving Token Address>",
+            from: tokenAddress,
+            // recipient token address
+            to: "CdHZcjZWgBJ1GKQPJUzzes716kiViHP9vAZMexNCx7Bd",
             owner: from,
-            amount: "1000000",
-            mint: "<mint>",
-            decimal: 6,
+            amount: "1000000",  // token amount
+            mint,
+            decimal: 6,  // token decimal
           }
         ),
         ownerships: [
@@ -214,13 +219,16 @@ function Example(props) {
     );
     const response = await device.Exchange(commandData);
     const signedTx = SecuxSOL.resolveTransaction(response, serialized);
+    // --------------------------------------------------------------------
 
     setTransaction(signedTx);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <Button onClick={() => useSecuX(MakeTransaction, "ble")}/>
       <h2>{tranasction}</h2>
     </div>
   );
@@ -237,28 +245,30 @@ function Example(props) {
   const [tranasction, setTransaction] = useState('');
 
   async function MakeTransaction(device) {
+    // set BIP-32 path for Solana.
     const path = "m/44'/501'/0'";
     const from = await device.getAddress(path);
+    // set spl token mint address.
+    const mint = "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB";
 
     // fetch data from solana api
     const api = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl("mainnet-beta"));
     const recentBlockhash = (await api.getRecentBlockhash()).blockhash;
 
-    // signing by SecuX
+    // ------------------------- signing by SecuX -------------------------
     const { commandData, serialized } = SecuxSOL.prepareSign(
       from, // feePayer
       {
         recentBlockhash,
         instructions: SecuxSOL.Action.transferToken(
           {
-            // default is ATA address, it will be generated by parameters
-            // from,
-            to: "<Receiving Account Address>",
+            // recipient account address
+            to: "GjJyeC1r2RgkuoCWMyPYkCWSGSGLcz266EaAkLA27AhL",
             owner: from,
-            amount: "1000000",
-            mint: "<mint>",
-            decimal: 6,
-            // create ATA account for receiver
+            amount: 1000000,  // token amount
+            mint,
+            decimal: 6,  // token decimal
+            // create ATA account for recipient
             createAccount: true
           }
         ),
@@ -269,13 +279,16 @@ function Example(props) {
     );
     const response = await device.Exchange(commandData);
     const signedTx = SecuxSOL.resolveTransaction(response, serialized);
+    // --------------------------------------------------------------------
 
     setTransaction(signedTx);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <Button onClick={() => useSecuX(MakeTransaction, "ble")}/>
       <h2>{tranasction}</h2>
     </div>
   );
@@ -292,6 +305,7 @@ function Example(props) {
   const [tranasction, setTransaction] = useState('');
 
   async function MakeTransaction(device) {
+    // set BIP-32 path for Solana.
     const path = "m/44'/501'/0'";
     const from = await device.getAddress(path);
 
@@ -299,7 +313,7 @@ function Example(props) {
     const api = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl("mainnet-beta"));
     const recentBlockhash = (await api.getRecentBlockhash()).blockhash;
     
-    // signing by SecuX
+    // ------------------------- signing by SecuX -------------------------
     const { commandData, serialized } = SecuxSOL.prepareSign(
       from, // feePayer
       {
@@ -307,10 +321,12 @@ function Example(props) {
         instructions: SecuxSOL.Action.stake(
           {
             owner: from,
+            // you can put seed here for account creation
             stake: "<seed or stake address>",
-            vote: "<pool address>",
-            lamports: 1e9,
-            space: 200
+            vote: "9tedbEYypEKXAMkHcg42rn3fXY1B8hB6cdE3ZTFouXLL",  // vote address
+            lamports: 1e9,  // SOL amount
+            // account space setting, default: 200
+            // space: 200
           }
         ),
         ownerships: [
@@ -320,13 +336,16 @@ function Example(props) {
     );
     const response = await device.Exchange(commandData);
     const signedTx = SecuxSOL.resolveTransaction(response, serialized);
+    // --------------------------------------------------------------------
 
     setTransaction(signedTx);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <Button onClick={() => useSecuX(MakeTransaction, "ble")}/>
       <h2>{tranasction}</h2>
     </div>
   );
@@ -344,6 +363,7 @@ function Example(props) {
   const [tranasction, setTransaction] = useState('');
 
   async function MakeTransaction(device) {
+    // set BIP-32 path for Solana.
     const path = "m/44'/501'/0'";
     const from = await device.getAddress(path);
 
@@ -351,7 +371,7 @@ function Example(props) {
     const api = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl("mainnet-beta"));
     const recentBlockhash = (await api.getRecentBlockhash()).blockhash;
     
-    // signing by SecuX
+    // ------------------------- signing by SecuX -------------------------
     const { commandData, serialized } = SecuxSOL.prepareSign(
       from, // feePayer
       {
@@ -359,8 +379,9 @@ function Example(props) {
         instructions: SecuxSOL.Action.unstake(
           {
             owner: from,
+            // you can put seed here for account creation
             stake: "<seed or stake address>",
-            lamports: 1e9
+            lamports: 1e9  // SOL amount
           }
         ),
         ownerships: [
@@ -370,13 +391,16 @@ function Example(props) {
     );
     const response = await device.Exchange(commandData);
     const signedTx = SecuxSOL.resolveTransaction(response, serialized);
+    // --------------------------------------------------------------------
 
     setTransaction(signedTx);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <Button onClick={() => useSecuX(MakeTransaction, "ble")}/>
       <h2>{tranasction}</h2>
     </div>
   );
@@ -394,15 +418,16 @@ function Example(props) {
   const [tranasction, setTransaction] = useState('');
 
   async function MakeTransaction(device) {
+    // set BIP-32 path for Solana.
     const path = "m/44'/501'/0'";
     const from = await device.getAddress(path);
-    const to = "<Receiving Address>";
 
     // fetch data from solana api
     const api = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl("mainnet-beta"));
     const recentBlockhash = (await api.getRecentBlockhash()).blockhash;
 
     // create instructions
+    const to = "GjJyeC1r2RgkuoCWMyPYkCWSGSGLcz266EaAkLA27AhL";
     const transfer = solanaWeb3.SystemProgram.transfer({
       fromPubkey: new solanaWeb3.PublicKey(from),
       toPubkey: new solanaWeb3.PublicKey(to),
@@ -414,7 +439,7 @@ function Example(props) {
       publickey: x.pubkey.toBuffer()
     }));
     
-    // signing by SecuX
+    // ------------------------- signing by SecuX -------------------------
     const { commandData, serialized } = SecuxSOL.prepareSign(
       from, // feePayer
       {
@@ -433,13 +458,16 @@ function Example(props) {
     );
     const response = await device.Exchange(commandData);
     const signedTx = SecuxSOL.resolveTransaction(response, serialized);
+    // --------------------------------------------------------------------
 
     setTransaction(signedTx);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <Button onClick={() => useSecuX(MakeTransaction, "ble")}/>
       <h2>{tranasction}</h2>
     </div>
   );

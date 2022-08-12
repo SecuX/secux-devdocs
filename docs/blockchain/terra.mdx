@@ -16,21 +16,6 @@ This package supports the following modules, under namespace `SecuxLUNA`.
 - MsgDelegate, MsgWithdrawDelegatorReward, MsgUndelegate, MsgBeginRedelegate
 
 ## Examples
-The following examples will be demonstrated using usb.
-```jsx
-import { SecuxWebUSB } from "@secux/transport-webusb";
-import { SecuxLUNA } from "@secux/app-luna";
-
-export async function useSecuX(callback) {
-  const device = await SecuxWebUSB.Create();
-  await device.Connect();
-
-  await callback(device);
-
-  await device.Disconnect();
-}
-```
-
 
 ### Generate Account Address
 The following example is a React playground. Try modifying path `m/44'/330'/0'/0/0` and play with it!
@@ -51,9 +36,11 @@ function Example(props) {
     setAddress(address);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(GenerateAddress)}/>
+      <Button onClick={() => useSecuX(GenerateAddress, "ble")}/>
       <h2>{address}</h2>
     </div>
   );
@@ -81,9 +68,11 @@ function Example(props) {
     setAddress(address);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(GenerateAddress)}/>
+      <Button onClick={() => useSecuX(GenerateAddress, "ble")}/>
       <h2>{address}</h2>
     </div>
   );
@@ -111,9 +100,11 @@ function Example(props) {
     setAddress(address);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(GenerateAddress)}/>
+      <Button onClick={() => useSecuX(GenerateAddress, "ble")}/>
       <h2>{address}</h2>
     </div>
   );
@@ -184,9 +175,11 @@ function Example(props) {
     setTransaction(signedTx);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <Button onClick={() => useSecuX(MakeTransaction, "ble")}/>
       <h2>{tranasction}</h2>
     </div>
   );
@@ -260,9 +253,11 @@ function Example(props) {
     setTransaction(signedTx);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <Button onClick={() => useSecuX(MakeTransaction, "ble")}/>
       <h2>{tranasction}</h2>
     </div>
   );
@@ -343,9 +338,11 @@ function Example(props) {
     setTransaction(signedTx);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <Button onClick={() => useSecuX(MakeTransaction, "ble")}/>
       <h2>{tranasction}</h2>
     </div>
   );
@@ -416,9 +413,11 @@ function Example(props) {
     setTransaction(signedTx);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <Button onClick={() => useSecuX(MakeTransaction, "ble")}/>
       <h2>{tranasction}</h2>
     </div>
   );
@@ -488,9 +487,11 @@ function Example(props) {
     setTransaction(signedTx);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <Button onClick={() => useSecuX(MakeTransaction, "ble")}/>
       <h2>{tranasction}</h2>
     </div>
   );
@@ -561,9 +562,11 @@ function Example(props) {
     setTransaction(signedTx);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <Button onClick={() => useSecuX(MakeTransaction, "ble")}/>
       <h2>{tranasction}</h2>
     </div>
   );
@@ -635,9 +638,11 @@ function Example(props) {
     setTransaction(signedTx);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <Button onClick={() => useSecuX(MakeTransaction, "ble")}/>
       <h2>{tranasction}</h2>
     </div>
   );

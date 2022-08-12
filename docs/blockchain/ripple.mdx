@@ -18,21 +18,6 @@ The current minimum reserve requirement is **10 XRP**.
 :::
 
 ## Examples
-The following examples will be demonstrated using usb.
-```jsx
-import { SecuxWebUSB } from "@secux/transport-webusb";
-import { SecuxXRP } from "@secux/app-xrp";
-
-export async function useSecuX(callback) {
-  const device = await SecuxWebUSB.Create();
-  await device.Connect();
-
-  await callback(device);
-
-  await device.Disconnect();
-}
-```
-
 
 ### Generate Address
 The following example is a React playground. Try modifying the BIP-32 path `m/44'/144'/0'/0/0` and play with it!
@@ -44,7 +29,7 @@ function Example(props) {
   const [address, setAddress] = useState('');
 
   async function GenerateAddress(device) {
-    // Modify BIP-32 path to play.
+    // set BIP-32 path for Ripple.
     const path = "m/44'/144'/0'/0/0";
     const buffer = SecuxXRP.prepareAddress(path);
     const response = await device.Exchange(buffer);
@@ -53,9 +38,11 @@ function Example(props) {
     setAddress(address);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(GenerateAddress)}/>
+      <Button onClick={() => useSecuX(GenerateAddress, "ble")}/>
       <h2>{address}</h2>
     </div>
   );
@@ -72,6 +59,7 @@ function Example(props) {
   const [tranasction, setTransaction] = useState('');
 
   async function MakeTransaction(device) {
+    // set BIP-32 path for Ripple.
     const path = "m/44'/144'/0'/0/0";
     const publickey = await device.getPublickey(path);
 
@@ -82,12 +70,12 @@ function Example(props) {
     let payment = {
       TransactionType: "Payment",
       Account: SecuxXRP.addressConvert(publickey),
-      Destination: "<Receiving Address>",
-      Amount: 10 * 1e6
+      Destination: "rHsMGQEkVNJmpGWs8XUBoTBiAAbwxZN5v3",  // recipient
+      Amount: 10 * 1e6  // XRP amount
     };
     payment = await api.autofill(payment);
 
-    // signing by SecuX
+    // ------------------------- signing by SecuX -------------------------
     const { commandData, serialized } = SecuxXRP.prepareSign(
       path,
       {
@@ -97,13 +85,16 @@ function Example(props) {
     );
     const response = await device.Exchange(commandData);
     const signedTx = SecuxXRP.resolveTransaction(response, serialized);
+    // --------------------------------------------------------------------
 
     setTransaction(signedTx);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <Button onClick={() => useSecuX(MakeTransaction, "ble")}/>
       <h2>{tranasction}</h2>
     </div>
   );

@@ -1,10 +1,10 @@
 ---
-sidebar_position: 3
+sidebar_position: 2
 ---
 
-# Web Bluetooth
+# Web HID
 
-A web application can connect to SecuX via Bluetooth.
+A web application can connect to SecuX via USB. (for Nifty)
 
 ## Requirements
 - [Node.js](https://nodejs.org/en/download/) version >= `14` or above (which can be checked by running `node -v`). You can use nvm for managing multiple Node versions on a single machine installed.
@@ -18,7 +18,7 @@ Web application need to polyfill Node.js core modules. ex: [node-polyfill-webpac
 
 ## Installation
 ```bash npm
-npm install @secux/transport-webble
+npm install @secux/transport-webhid
 ```
 
 ## Example
@@ -28,24 +28,18 @@ npm install @secux/app-eth
 ```
 
 This application will connect to your SecuX to display the address of your account.
+
 ```js
-import { SecuxWebBLE } from "@secux/transport-webble";
+import { SecuxWebHID } from "@secux/transport-webhid";
 require("@secux/app-eth");
 
 // highlight-start
-const device = await SecuxWebBLE.Create(
+const device = await SecuxWebHID.Create(
   () => alert("connected"),  // callback when device connected
-  () => alert("disconnected"),  // callback when device disconnected
-  ["crypto", "nifty"]  // device filter, default: ["crypto"]
+  () => alert("disconnected")  // callback when device disconnected
 );
 
 await device.Connect();
-
-// W20, V20 need to verify OTP
-if (device.DeviceType === "crypto") {
-  const otp = prompt("Please enter otp showing on your SecuX");
-  await device.SendOTP(otp);
-}
 // highlight-end
 
 // query Ethereum address
@@ -61,26 +55,19 @@ The following example is a React playground. Try modifying the BIP-32 path `m/44
 ```jsx live
 // We cannot import packages in live editor, please uncomment it for use.
 // import React from "react";
-// import { SecuxWebBLE } from "@secux/transport-webble";
+// import { SecuxWebHID } from "@secux/transport-webhid";
 // require("@secux/app-eth");
 
 function Example(props) {
   const [address, setAddress] = useState('');
 
   async function Connect() {
-    const device = await SecuxWebBLE.Create(
+    const device = await SecuxWebHID.Create(
       () => alert("connected"),  // callback when device connected
-      () => alert("disconnected"),  // callback when device disconnected
-      ["crypto", "nifty"]  // device filter, default: ["crypto"]
+      () => alert("disconnected")  // callback when device disconnected
     );
-    
-    await device.Connect();
 
-    // W20, V20 need to verify OTP
-    if (device.DeviceType === "crypto") {
-      const otp = prompt("Please enter otp showing on your SecuX");
-      await device.SendOTP(otp);
-    }
+    await device.Connect();
 
     // query Ethereum address
     const address = await device.getAddress("m/44'/60'/0'/0/0");
@@ -98,10 +85,3 @@ function Example(props) {
 }
 ```
 
-
-
-:::info
-
-Some browser globally disable Web Bluetooth API, please use Chrome instead.
-
-:::

@@ -25,27 +25,14 @@ SecuX supports the following encryption curves:
 export enum EllipticCurve {
   SECP256K1,
   ED25519,
-  ED25519_ADA
+  ED25519_ADA,
+  SCHNORR_BTC,
+  ED25519_RAW,
+  SECP256K1_LOW_R,
 }
 ```
 
 ## Examples
-The following example is a React playground, and will be demonstrated using USB.
-```jsx
-import { SecuxWebUSB } from "@secux/transport-webusb";
-import { SecuxTransactionTool } from "@secux/protocol-transaction";
-import { EllipticCurve } from "@secux/protocol-transaction/lib/interface";
-
-export async function useSecuX(callback) {
-  const device = await SecuxWebUSB.Create();
-  await device.Connect();
-
-  await callback(device);
-
-  await device.Disconnect();
-}
-```
-
 :::caution notice
 
 The response data of buffer from `SecuxTransactionTool` is **base64 encoded**.
@@ -64,10 +51,12 @@ function Example(props) {
   const [publickey, setPublickey] = useState('');
 
   async function GeneratePublickey(device) {
+    // set BIP-32 path
     const path = "m/44'/0'/0'/0/0";
     const curve = EllipticCurve.SECP256K1;
     const compressed = false; // for secp256k1
 
+    // ---------------------- get publickey from SecuX ----------------------
     const buffer = SecuxTransactionTool.getPublickey(path, curve);
     const response = await device.Exchange(buffer);
     const publickey_64 = SecuxTransactionTool.resolvePublickey(
@@ -75,14 +64,17 @@ function Example(props) {
       curve, 
       compressed
     );
+    // ----------------------------------------------------------------------
     
     const publickey = Buffer.from(publickey_64, "base64").toString("hex");
     setPublickey(publickey);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(GeneratePublickey)}/>
+      <Button onClick={() => useSecuX(GeneratePublickey, "ble")}/>
       <h2>{publickey}</h2>
     </div>
   );
@@ -101,9 +93,11 @@ function Example(props) {
   const [xpublickey, setXPublickey] = useState('');
 
   async function GenerateXPublickey(device) {
+    // set BIP-32 path
     const path = "m/44'/0'/0'";
     const curve = EllipticCurve.SECP256K1;
 
+    // ---------------------- get xpub from SecuX ----------------------
     const buffer = SecuxTransactionTool.getXPublickey(path, curve);
     const response = await device.Exchange(buffer);
     const xpublickey = SecuxTransactionTool.resolveXPublickey(
@@ -111,13 +105,16 @@ function Example(props) {
       path, 
       curve
     );
+    // -----------------------------------------------------------------
     
     setXPublickey(xpublickey);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(GenerateXPublickey)}/>
+      <Button onClick={() => useSecuX(GenerateXPublickey, "ble")}/>
       <h2>{xpublickey}</h2>
     </div>
   );
@@ -125,7 +122,7 @@ function Example(props) {
 ```
 
 ### How to get a signature
-For showing transaction content explicitly, please [contact us](https://linktr.ee/SecuXwallet) with your implementation.
+For showing transaction content explicitly, please [contact us](https://discord.com/invite/u68wJ3EzPk) with your implementation.
 ```jsx live
 // We cannot import packages in live editor, please uncomment it for use.
 // import { SecuxTransactionTool } from "@secux/protocol-transaction";
@@ -135,9 +132,11 @@ function Example(props) {
   const [signature, setSignature] = useState('');
 
   async function GenerateSignature(device) {
+    // set BIP-32 path
     const path = "m/44'/0'/0'";
     const curve = EllipticCurve.SECP256K1;
 
+    // ------------------------- signing by SecuX -------------------------
     const buffer = SecuxTransactionTool.signTransaction(
       path,
       // hashed transaction content
@@ -148,14 +147,17 @@ function Example(props) {
     );
     const response = await device.Exchange(buffer);
     const signature_64 = SecuxTransactionTool.resolveSignature(response);
-    
+    // --------------------------------------------------------------------
+
     const signature = Buffer.from(signature_64, "base64").toString("hex");
     setSignature(signature);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(GenerateSignature)}/>
+      <Button onClick={() => useSecuX(GenerateSignature, "ble")}/>
       <h2>{signature}</h2>
     </div>
   );

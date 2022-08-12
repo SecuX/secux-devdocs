@@ -7,6 +7,8 @@
 
 import React, { type ComponentProps, useEffect, useState } from 'react';
 import { SecuxWebUSB } from "@secux/transport-webusb";
+import { SecuxWebBLE } from "@secux/transport-webble";
+import { SecuxWebHID } from "@secux/transport-webhid";
 
 
 export function Button(props: ComponentProps<'button'>): JSX.Element {
@@ -53,9 +55,29 @@ export function Button(props: ComponentProps<'button'>): JSX.Element {
     );
 }
 
-export async function useSecuX(callback) {
-    const device = await SecuxWebUSB.Create();
-    await device.Connect();
+export async function useSecuX(callback, transport = "usb") {
+    let device;
+    switch (transport) {
+        case "ble":
+            device = await SecuxWebBLE.Create(undefined, undefined, ["crypto", "nifty"]);
+            await device.Connect();
+
+            if (device.DeviceType === "crypto") {
+                const otp = prompt("Please enter otp showing on your SecuX");
+                await device.SendOTP(otp);
+            }
+            break;
+
+        case "hid":
+            device = await SecuxWebHID.Create();
+            await device.Connect();
+            break;
+
+        default:
+            device = await SecuxWebUSB.Create();
+            await device.Connect();
+            break;
+    }
 
     let e;
     try {

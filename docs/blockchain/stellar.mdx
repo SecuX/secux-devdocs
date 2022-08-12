@@ -16,21 +16,6 @@ Stellar requires accounts to **hold a minimum balance of 1 XLM** before they act
 :::
 
 ## Examples
-The following examples will be demonstrated using usb.
-```jsx
-import { SecuxWebUSB } from "@secux/transport-webusb";
-import { SecuxXLM } from "@secux/app-xlm";
-
-export async function useSecuX(callback) {
-  const device = await SecuxWebUSB.Create();
-  await device.Connect();
-
-  await callback(device);
-
-  await device.Disconnect();
-}
-```
-
 
 ### Generate Address
 The following example is a React playground. Try modifying the BIP-32 path `m/44'/148'/0'` and play with it!
@@ -42,7 +27,7 @@ function Example(props) {
   const [address, setAddress] = useState('');
 
   async function GenerateAddress(device) {
-    // Modify BIP-32 path to play.
+    // set BIP-32 path for Stellar.
     const path = "m/44'/148'/0'";
     const buffer = SecuxXLM.prepareAddress(path);
     const response = await device.Exchange(buffer);
@@ -51,9 +36,11 @@ function Example(props) {
     setAddress(address);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(GenerateAddress)}/>
+      <Button onClick={() => useSecuX(GenerateAddress, "ble")}/>
       <h2>{address}</h2>
     </div>
   );
@@ -70,9 +57,11 @@ function Example(props) {
   const [tranasction, setTransaction] = useState('');
 
   async function MakeTransaction(device) {
+    // set BIP-32 path for Stellar.
     const path = "m/44'/148'/0'";
     const fromAddress = await device.getAddress(path);
-    const toAddress = "<Receiving Address>";
+    // recipient
+    const toAddress = "GB3JDWCQJCWMJ3IILWIGDTQJJC5567PGVEVXSCVPEQOTDN64VJBDQBYX";
 
     // fetch data from stellar api
     const url = "https://horizon.stellar.org";
@@ -90,6 +79,7 @@ function Example(props) {
     };
     const needCreateAccount = await isNullAccount(toAddress);
 
+    // ------------------------- signing by SecuX -------------------------
     const { commandData, serialized } = SecuxXLM.prepareSign(
       path,
       {
@@ -98,19 +88,21 @@ function Example(props) {
         amount: "1",
         sequence,
         fee: last_ledger_base_fee,
-        // for new address that don't have on-chain data
-        needCreateAccount
+        needCreateAccount  // for new address that don't have on-chain data
       }
     );
     const response = await device.Exchange(commandData);
     const signedTx = SecuxXLM.resolveTransaction(response, serialized);
+    // --------------------------------------------------------------------
 
     setTransaction(signedTx);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <Button onClick={() => useSecuX(MakeTransaction, "ble")}/>
       <h2>{tranasction}</h2>
     </div>
   );

@@ -50,21 +50,6 @@ The cointype of BIP-32 path is `0` for Bitcoin, 145 (BCH), 5 (DASH), 20 (DGB), 3
 :::
 
 ## Examples
-The following examples will be demonstrated using usb.
-```jsx
-import { SecuxWebUSB } from "@secux/transport-webusb";
-import { SecuxBTC } from "@secux/app-btc";
-
-export async function useSecuX(callback) {
-  const device = await SecuxWebUSB.Create();
-  await device.Connect();
-
-  await callback(device);
-
-  await device.Disconnect();
-}
-```
-
 
 ### Generate Address
 The following example is a React playground. Try modifying the BIP-32 path `m/84'/1'/0'/0/0` and play with it!
@@ -76,7 +61,7 @@ function Example(props) {
   const [address, setAddress] = useState('');
 
   async function GenerateAddress(device) {
-    // Modify BIP-32 path to play.
+    // set BIP-32 path for Bitcoin.
     const path = "m/84'/1'/0'/0/0";
     const buffer = SecuxBTC.prepareAddress(path);
     const response = await device.Exchange(buffer);
@@ -85,9 +70,11 @@ function Example(props) {
     setAddress(address);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(GenerateAddress)}/>
+      <Button onClick={() => useSecuX(GenerateAddress, "ble")}/>
       <h2>{address}</h2>
     </div>
   );
@@ -95,7 +82,7 @@ function Example(props) {
 ```
 
 ### Make Transaction
-The following example is a React playground. Try modifying `<Receiving Address>` and play with it!
+The following example is a React playground. Try it yourself!
 ```jsx live
 // We cannot import packages in live editor, please uncomment it for use.
 // import { SecuxBTC, CoinType, ScriptType } from "@secux/app-btc";
@@ -131,7 +118,7 @@ function Example(props) {
       }
     }
 
-    // signing by SecuX
+    // ------------------------- signing by SecuX -------------------------
     const { commands, rawTx } = SecuxBTC.prepareSign(
       inputs,
       {
@@ -167,13 +154,16 @@ function Example(props) {
         publickeys: inputs.map(txIn => txIn.publickey),
       }
     );
+    // --------------------------------------------------------------------
 
     setTransaction(signedTx);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <Button onClick={() => useSecuX(MakeTransaction, "ble")}/>
       <h2>{tranasction}</h2>
     </div>
   );

@@ -10,21 +10,6 @@ npm install @secux/app-ada
 ```
 
 ## Examples
-The following examples will be demonstrated using usb.
-```jsx
-import { SecuxWebUSB } from "@secux/transport-webusb";
-import { SecuxADA } from "@secux/app-ada";
-
-export async function useSecuX(callback) {
-  const device = await SecuxWebUSB.Create();
-  await device.Connect();
-
-  await callback(device);
-
-  await device.Disconnect();
-}
-```
-
 
 ### Generate Base Address
 The following example is a React playground. Try modifying the BIP-32 path `m/1852'/1815'/0'` and play with it!
@@ -36,7 +21,7 @@ function Example(props) {
   const [address, setAddress] = useState('');
 
   async function GenerateAddress(device) {
-    // Modify BIP-32 path to play.
+    // set BIP-32 path for Cardano.
     const path = "m/1852'/1815'/0'";
     const buffer = SecuxADA.prepareAddress(path);
     const response = await device.Exchange(buffer);
@@ -52,9 +37,11 @@ function Example(props) {
     setAddress(address);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(GenerateAddress)}/>
+      <Button onClick={() => useSecuX(GenerateAddress, "ble")}/>
       <h2>{address}</h2>
     </div>
   );
@@ -70,7 +57,7 @@ function Example(props) {
   const [address, setAddress] = useState('');
 
   async function GenerateAddress(device) {
-    // Modify BIP-32 path to play.
+    // set BIP-32 path for Cardano.
     const path = "m/1852'/1815'/0'";
     const buffer = SecuxADA.prepareAddress(path);
     const response = await device.Exchange(buffer);
@@ -85,9 +72,11 @@ function Example(props) {
     setAddress(address);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(GenerateAddress)}/>
+      <Button onClick={() => useSecuX(GenerateAddress, "ble")}/>
       <h2>{address}</h2>
     </div>
   );
@@ -109,6 +98,7 @@ function Example(props) {
   const [tranasction, setTransaction] = useState('');
 
   async function MakeTransaction(device) {
+    // set BIP-32 path for Cardano.
     const path = "m/1852'/1815'/0'";
     const xpublickey = await device.getXPublickey(path);
     const fromAddress = SecuxADA.addressConvert(
@@ -133,12 +123,12 @@ function Example(props) {
       }
     ));
 
-    // signing by SecuX
+    // ------------------------- signing by SecuX -------------------------
     const { commandData, serialized } = SecuxADA.prepareSign(
       inputs,
       {
-        address: "<Receiving Address>",
-        amount: 1e6
+        address: "<recipient address>",
+        amount: 1e6  // ADA amount
       },
       {
         changeAddress: fromAddress,
@@ -148,13 +138,16 @@ function Example(props) {
     );
     const response = await device.Exchange(commandData);
     const signedTx = SecuxADA.resolveTransaction(response, serialized);
+    // --------------------------------------------------------------------
 
     setTransaction(signedTx);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <Button onClick={() => useSecuX(MakeTransaction, "ble")}/>
       <h2>{tranasction}</h2>
     </div>
   );
@@ -171,6 +164,7 @@ function Example(props) {
   const [tranasction, setTransaction] = useState('');
 
   async function MakeTransaction(device) {
+    // set BIP-32 path for Cardano.
     const path = "m/1852'/1815'/0'";
     const xpublickey = await device.getXPublickey(path);
     const fromAddress = SecuxADA.addressConvert(
@@ -193,7 +187,7 @@ function Example(props) {
       }
     ));
 
-    // signing by SecuX
+    // ------------------------- signing by SecuX -------------------------
     const { commandData, serialized } = SecuxADA.prepareStake(
       {
         path,
@@ -208,13 +202,16 @@ function Example(props) {
     );
     const response = await device.Exchange(commandData);
     const signedTx = SecuxADA.resolveTransaction(response, serialized);
+    // --------------------------------------------------------------------
 
     setTransaction(signedTx);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <Button onClick={() => useSecuX(MakeTransaction, "ble")}/>
       <h2>{tranasction}</h2>
     </div>
   );
@@ -231,6 +228,7 @@ function Example(props) {
   const [tranasction, setTransaction] = useState('');
 
   async function MakeTransaction(device) {
+    // set BIP-32 path for Cardano.
     const path = "m/1852'/1815'/0'";
     const xpublickey = await device.getXPublickey(path);
     const fromAddress = SecuxADA.addressConvert(
@@ -255,7 +253,7 @@ function Example(props) {
     };
     const { withdrawable_amount } = (await api.get(`/accounts/${rewardAddress}`)).data;
 
-    // signing by SecuX
+    // ------------------------- signing by SecuX -------------------------
     const { commandData, serialized } = SecuxADA.prepareWithdraw(
       {
         path,
@@ -267,13 +265,16 @@ function Example(props) {
     );
     const response = await device.Exchange(commandData);
     const signedTx = SecuxADA.resolveTransaction(response, serialized);
+    // --------------------------------------------------------------------
 
     setTransaction(signedTx);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <Button onClick={() => useSecuX(MakeTransaction, "ble")}/>
       <h2>{tranasction}</h2>
     </div>
   );
@@ -290,6 +291,7 @@ function Example(props) {
   const [tranasction, setTransaction] = useState('');
 
   async function MakeTransaction(device) {
+    // set BIP-32 path for Cardano.
     const path = "m/1852'/1815'/0'";
     const xpublickey = await device.getXPublickey(path);
     const fromAddress = SecuxADA.addressConvert(
@@ -314,7 +316,7 @@ function Example(props) {
     };
     const { withdrawable_amount } = (await api.get(`/accounts/${rewardAddress}`)).data;
 
-    // signing by SecuX
+    // ------------------------- signing by SecuX -------------------------
     const { commandData, serialized } = SecuxADA.prepareUnstake(
       {
         path,
@@ -330,13 +332,16 @@ function Example(props) {
     );
     const response = await device.Exchange(commandData);
     const signedTx = SecuxADA.resolveTransaction(response, serialized);
+    // --------------------------------------------------------------------
 
     setTransaction(signedTx);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <Button onClick={() => useSecuX(MakeTransaction, "ble")}/>
       <h2>{tranasction}</h2>
     </div>
   );

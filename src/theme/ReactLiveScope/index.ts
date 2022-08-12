@@ -17,6 +17,7 @@ import { Buffer } from "buffer";
 import randomBytes from "randombytes";
 import { ITransport } from "@secux/transport";
 import { SecuxWebUSB } from "@secux/transport-webusb";
+import { SecuxWebHID } from "@secux/transport-webhid";
 import { SecuxWebBLE } from "@secux/transport-webble";
 import { SecuxTransactionTool } from "@secux/protocol-transaction";
 import * as protocolInterface from "@secux/protocol-transaction/lib/interface";
@@ -46,6 +47,7 @@ const ReactLiveScope = {
     randomBytes,
     ITransport,
     SecuxWebUSB,
+    SecuxWebHID,
     SecuxWebBLE,
     SecuxTransactionTool,
     ...protocolInterface,

@@ -18,21 +18,6 @@ Every account is capable of issuing tokens at the expense of 1024 TRX.
 TRC-20 is a technical standard used for smart contracts on the TRON blockchain for implementing tokens with the TRON Virtual Machine (TVM). It is fully compatible with ERC-20.
 
 ## Examples
-The following examples will be demonstrated using usb.
-```jsx
-import { SecuxWebUSB } from "@secux/transport-webusb";
-import { SecuxTRX } from "@secux/app-trx";
-
-export async function useSecuX(callback) {
-  const device = await SecuxWebUSB.Create();
-  await device.Connect();
-
-  await callback(device);
-
-  await device.Disconnect();
-}
-```
-
 
 ### Generate Address
 The following example is a React playground. Try modifying the BIP-32 path `m/44'/195'/0'/0/0` and play with it!
@@ -44,7 +29,7 @@ function Example(props) {
   const [address, setAddress] = useState('');
 
   async function GenerateAddress(device) {
-    // Modify BIP-32 path to play.
+    // set BIP-32 path for Tron.
     const path = "m/44'/195'/0'/0/0";
     const buffer = SecuxTRX.prepareAddress(path);
     const response = await device.Exchange(buffer);
@@ -53,9 +38,11 @@ function Example(props) {
     setAddress(address);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(GenerateAddress)}/>
+      <Button onClick={() => useSecuX(GenerateAddress, "ble")}/>
       <h2>{address}</h2>
     </div>
   );
@@ -72,6 +59,7 @@ function Example(props) {
   const [tranasction, setTransaction] = useState('');
 
   async function MakeTransaction(device) {
+    // set BIP-32 path for Tron.
     const path = "m/44'/195'/0'/0/0";
     const fromAddress = await device.getAddress(path);
 
@@ -79,13 +67,13 @@ function Example(props) {
     const api = new TronWeb({ fullHost: 'https://api.trongrid.io' });
     const block = await api.trx.getConfirmedCurrentBlock();
 
-    // signing by SecuX
+    // ------------------------- signing by SecuX -------------------------
     const { commandData, rawTx } = SecuxTRX.prepareSign(
       path,
       {
         from: fromAddress,
-        to: "<Receiving Address>",
-        amount: 1e6,
+        to: "TUEZSdKsoDHQMeZwihtdoBiN46zxhGWYdH",  // recipient
+        amount: 1e6,  // TRX amount
         blockID: block.blockID,
         blockNumber: block.block_header.raw_data.number,
         timestamp: block.block_header.raw_data.timestamp
@@ -93,13 +81,16 @@ function Example(props) {
     );
     const response = await device.Exchange(commandData);
     const signedTx = SecuxTRX.resolveTransaction(response, rawTx);
+    // --------------------------------------------------------------------
 
     setTransaction(signedTx);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <Button onClick={() => useSecuX(MakeTransaction, "ble")}/>
       <h2>{tranasction}</h2>
     </div>
   );
@@ -116,6 +107,7 @@ function Example(props) {
   const [tranasction, setTransaction] = useState('');
 
   async function MakeTransaction(device) {
+    // set BIP-32 path for Tron.
     const path = "m/44'/195'/0'/0/0";
     const fromAddress = await device.getAddress(path);
 
@@ -123,12 +115,12 @@ function Example(props) {
     const api = new TronWeb({ fullHost: 'https://api.trongrid.io' });
     const block = await api.trx.getConfirmedCurrentBlock();
 
-    // signing by SecuX
+    // ------------------------- signing by SecuX -------------------------
     const { commandData, rawTx } = SecuxTRX.prepareSign(
       path,
       {
         from: fromAddress,
-        to: "<Receiving Address>",
+        to: "TUEZSdKsoDHQMeZwihtdoBiN46zxhGWYdH",  // recipient
         token: "<Token Id>",
         amount: 1e6,
         blockID: block.blockID,
@@ -138,13 +130,16 @@ function Example(props) {
     );
     const response = await device.Exchange(commandData);
     const signedTx = SecuxTRX.resolveTransaction(response, rawTx);
+    // --------------------------------------------------------------------
 
     setTransaction(signedTx);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <Button onClick={() => useSecuX(MakeTransaction, "ble")}/>
       <h2>{tranasction}</h2>
     </div>
   );
@@ -161,6 +156,7 @@ function Example(props) {
   const [tranasction, setTransaction] = useState('');
 
   async function MakeTransaction(device) {
+    // set BIP-32 path for Tron.
     const path = "m/44'/195'/0'/0/0";
     const fromAddress = await device.getAddress(path);
 
@@ -168,14 +164,14 @@ function Example(props) {
     const api = new TronWeb({ fullHost: 'https://api.trongrid.io' });
     const block = await api.trx.getConfirmedCurrentBlock();
 
-    // signing by SecuX
+    // ------------------------- signing by SecuX -------------------------
     const { commandData, rawTx } = SecuxTRX.prepareSign(
       path,
       {
         from: fromAddress,
-        to: "<Receiving Address>",
-        contract: "<Contract Address>",
-        amount: 1e6,
+        to: "TUEZSdKsoDHQMeZwihtdoBiN46zxhGWYdH",  // recipient
+        contract: "TAFjULxiVgT4qWk6UZwjqwZXTSaGaqnVp4",  // contract address
+        amount: 1e9,  // token amount
         blockID: block.blockID,
         blockNumber: block.block_header.raw_data.number,
         timestamp: block.block_header.raw_data.timestamp
@@ -183,13 +179,16 @@ function Example(props) {
     );
     const response = await device.Exchange(commandData);
     const signedTx = SecuxTRX.resolveTransaction(response, rawTx);
+    // --------------------------------------------------------------------
 
     setTransaction(signedTx);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <Button onClick={() => useSecuX(MakeTransaction, "ble")}/>
       <h2>{tranasction}</h2>
     </div>
   );

@@ -10,21 +10,6 @@ npm install @secux/app-bnb
 ```
 
 ## Examples
-The following examples will be demonstrated using usb.
-```jsx
-import { SecuxWebUSB } from "@secux/transport-webusb";
-import { SecuxBNB } from "@secux/app-bnb";
-
-export async function useSecuX(callback) {
-  const device = await SecuxWebUSB.Create();
-  await device.Connect();
-
-  await callback(device);
-
-  await device.Disconnect();
-}
-```
-
 
 ### Generate Address
 The following example is a React playground. Try modifying the BIP-32 path `m/44'/714'/0'/0/0` and play with it!
@@ -36,7 +21,7 @@ function Example(props) {
   const [address, setAddress] = useState('');
 
   async function GenerateAddress(device) {
-    // Modify BIP-32 path to play.
+    // set BIP-32 path for Binance chain (BNB).
     const path = "m/44'/714'/0'/0/0";
     const buffer = SecuxBNB.prepareAddress(path);
     const response = await device.Exchange(buffer);
@@ -45,9 +30,11 @@ function Example(props) {
     setAddress(address);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(GenerateAddress)}/>
+      <Button onClick={() => useSecuX(GenerateAddress, "ble")}/>
       <h2>{address}</h2>
     </div>
   );
@@ -64,23 +51,24 @@ function Example(props) {
   const [tranasction, setTransaction] = useState('');
 
   async function MakeTransaction(device) {
+    // set BIP-32 path for Binance chain (BNB).
     const path = "m/44'/714'/0'/0/0";
     const publickey = await device.getPublickey(path);
-    const address = SecuxBNB.addressConvert(publickey);
 
     // fetch data from cardano api
+    const address = SecuxBNB.addressConvert(publickey);
     const api = axios.create({
       baseURL: "https://dex.binance.org/api/v1",
     });
     const { account_number, sequence } = (await api.get(`/account/${address}`)).data;
 
-    // signing by SecuX
+    // ------------------------- signing by SecuX -------------------------
     const { commandData, serialized } = SecuxBNB.prepareSign(
       path,
       {
         publickey,
-        to: "<Receiving Address>",
-        amount: 1e8,
+        to: "bnb1rxhz5vdv4fvdjye8gxqvfv0yvg20jtlwf4f38d",  // recipient
+        amount: 1e8,  // BNB amount
         // chainId: "Binance-Chain-Tigris",
         // accountNumber: account_number,
         // sequence: sequence,
@@ -89,13 +77,16 @@ function Example(props) {
     );
     const response = await device.Exchange(commandData);
     const signedTx = SecuxBNB.resolveTransaction(response, serialized);
+    // --------------------------------------------------------------------
 
     setTransaction(signedTx);
   }
 
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
   return (
     <div>
-      <Button onClick={() => useSecuX(MakeTransaction)}/>
+      <Button onClick={() => useSecuX(MakeTransaction, "ble")}/>
       <h2>{tranasction}</h2>
     </div>
   );
