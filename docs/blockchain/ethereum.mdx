@@ -209,7 +209,7 @@ function Example(props) {
 
     // fetch data from etherscan api
     const fromAddress = await device.getAddress(path);
-    const api = new ethers.providers.EtherscanProvider("ropsten");
+    const api = new ethers.providers.JsonRpcProvider("https://cloudflare-eth.com");
     const nonce = await api.getTransactionCount(fromAddress);
     const feeData = await api.getFeeData();
 
@@ -264,7 +264,7 @@ function Example(props) {
 
     // fetch data from etherscan api
     const fromAddress = await device.getAddress(path);
-    const api = new ethers.providers.EtherscanProvider("ropsten");
+    const api = new ethers.providers.JsonRpcProvider("https://cloudflare-eth.com");
     const nonce = await api.getTransactionCount(fromAddress);
     const feeData = await api.getFeeData();
 
@@ -321,7 +321,7 @@ function Example(props) {
     const fromAddress = await device.getAddress(path);
 
     // fetch data from etherscan api
-    const api = new ethers.providers.EtherscanProvider("ropsten");
+    const api = new ethers.providers.JsonRpcProvider("https://cloudflare-eth.com");
     const nonce = await api.getTransactionCount(fromAddress);
     const feeData = await api.getFeeData();
 
@@ -379,7 +379,7 @@ function Example(props) {
     const fromAddress = await device.getAddress(path);
 
     // fetch data from etherscan api
-    const api = new ethers.providers.EtherscanProvider("ropsten");
+    const api = new ethers.providers.JsonRpcProvider("https://cloudflare-eth.com");
     const nonce = await api.getTransactionCount(fromAddress);
     const feeData = await api.getFeeData();
 
@@ -440,7 +440,7 @@ function Example(props) {
     const fromAddress = await device.getAddress(path);
 
     // fetch data from etherscan api
-    const api = new ethers.providers.EtherscanProvider("ropsten");
+    const api = new ethers.providers.JsonRpcProvider("https://cloudflare-eth.com");
     const nonce = await api.getTransactionCount(fromAddress);
     const feeData = await api.getFeeData();
 
@@ -507,7 +507,7 @@ function Example(props) {
 
     // fetch data from etherscan api
     const fromAddress = await device.getAddress(path);
-    const api = new ethers.providers.EtherscanProvider("ropsten");
+    const api = new ethers.providers.JsonRpcProvider("https://cloudflare-eth.com");
     const nonce = await api.getTransactionCount(fromAddress);
     const feeData = await api.getFeeData();
 
@@ -558,7 +558,7 @@ function Example(props) {
 
     // fetch data from etherscan api
     const fromAddress = await device.getAddress(path);
-    const api = new ethers.providers.EtherscanProvider("ropsten");
+    const api = new ethers.providers.JsonRpcProvider("https://cloudflare-eth.com");
     const nonce = await api.getTransactionCount(fromAddress);
     const feeData = await api.getFeeData();
 
@@ -614,7 +614,7 @@ function Example(props) {
     const fromAddress = await device.getAddress(path);
 
     // fetch data from etherscan api
-    const api = new ethers.providers.EtherscanProvider("ropsten");
+    const api = new ethers.providers.JsonRpcProvider("https://cloudflare-eth.com");
     const nonce = await api.getTransactionCount(fromAddress);
     const feeData = await api.getFeeData();
   
@@ -671,7 +671,7 @@ function Example(props) {
     const fromAddress = await device.getAddress(path);
 
     // fetch data from etherscan api
-    const api = new ethers.providers.EtherscanProvider("ropsten");
+    const api = new ethers.providers.JsonRpcProvider("https://cloudflare-eth.com");
     const nonce = await api.getTransactionCount(fromAddress);
     const feeData = await api.getFeeData();
   
@@ -731,7 +731,7 @@ function Example(props) {
     const fromAddress = await device.getAddress(path);
 
     // fetch data from etherscan api
-    const api = new ethers.providers.EtherscanProvider("ropsten");
+    const api = new ethers.providers.JsonRpcProvider("https://cloudflare-eth.com");
     const nonce = await api.getTransactionCount(fromAddress);
     const feeData = await api.getFeeData();
   

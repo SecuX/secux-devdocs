@@ -1,0 +1,199 @@
+# NFT Management
+
+
+This article explains how to manage NFTs on SecuX hardware wallet.
+
+
+:::danger important
+
+This feature is not applied on SecuX V20/W20.
+
+:::
+
+## Introduction
+Non-fungible tokens (NFTs) are revolutionizing the way we own and manage digital assets, and need to be protected and secured.
+SecuX Nifty can manage, visualize, secure your NFTs directly.
+
+We are bringing the following special features for NFTs:
+- store NFTs
+- arrange NFTs
+- NFT as your profile picture
+- sign transaction with showing related NFT ✨
+
+## Examples
+
+:::danger important
+
+The media type of NFT must be JPEG format. Notice that compressed JPEG may not be supported.
+
+:::
+
+### Store NFT
+Store NFT with or without metadata into device.
+```jsx live
+// import { AttachmentType } from "@secux/protocol-device/lib/interface";
+
+function Example(props) {
+  async function StoreNFT(device) {
+    await device.sendImage(
+      "secux.jpg",
+      SecuXImage,  // image data (base64 encoded string or buffer)
+      {
+        assetName: "SecuX #0001",
+        collectionName: "SecuX",
+        tokenStandard: "Ethereum - ERC721",
+        type: AttachmentType.Ethereum,
+        contractAddress: "0x000000000000000000000000000000000000dEaD",
+        tokenId: "1",
+      }
+    );
+    await device.finishSync();
+  }
+
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
+  return (
+    <div>
+      <Button onClick={() => useSecuX(StoreNFT, "ble")}/>
+    </div>
+  );
+}
+```
+
+### Arrange NFT
+Remove NFT on device using wildcard.
+```jsx live
+function Example(props) {
+  async function RemoveNFT(device) {
+    const deleted = await device.removeFromGallery("secux.jpg");
+  }
+
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
+  return (
+    <div>
+      <Button onClick={() => useSecuX(RemoveNFT, "ble")}/>
+    </div>
+  );
+}
+```
+
+Hide first NFT on device.
+```jsx live
+function Example(props) {
+  async function HideNFT(device) {
+    const files = await device.listGalleryFiles();
+    files.shift();
+
+    await device.updateGalleryTable(files);
+  }
+
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
+  return (
+    <div>
+      <Button onClick={() => useSecuX(HideNFT, "ble")}/>
+    </div>
+  );
+}
+```
+
+Reset NFT arrangement on device.
+```jsx live
+function Example(props) {
+  async function ResetNFT(device) {
+    await device.resetGalleryTable();
+  }
+
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
+  return (
+    <div>
+      <Button onClick={() => useSecuX(ResetNFT, "ble")}/>
+    </div>
+  );
+}
+```
+
+### Set Profile Picture
+```jsx live
+function Example(props) {
+  async function SetProfile(device) {
+    await device.updateProfileImage(SecuXImage);
+  }
+
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
+  return (
+    <div>
+      <Button onClick={() => useSecuX(SetProfile, "ble")}/>
+    </div>
+  );
+}
+```
+
+### Sign with NFT
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { AttachmentType } from "@secux/protocol-device/lib/interface";
+// import { SecuxETH } from "@secux/app-eth";
+// import { ethers } from "ethers";
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function SignNFT(device) {
+    // fetch data from etherscan api
+    const path = "m/44'/60'/0'/0/0";
+    const fromAddress = await device.getAddress(path);
+    const api = new ethers.providers.JsonRpcProvider("https://cloudflare-eth.com");
+    const nonce = await api.getTransactionCount(fromAddress);
+    const feeData = await api.getFeeData();
+
+    const erc721 = new ethers.utils.Interface([
+      "function transferFrom(address _from, address _to, uint256 _tokenId) external payable",
+    ]);
+    const contractAddress = "0x000000000000000000000000000000000000dEaD";
+    const recipient = "0x0000000000000000000000000000000000000000";
+    const tokenId = "1";
+    const data = erc721.encodeFunctionData(
+      "transferFrom",
+      [fromAddress, recipient, tokenId]
+    );
+
+    // ------------------------- signing by SecuX -------------------------
+    const { raw_tx, signature } = await device.signWithImage(
+      "secux.jpg",
+      SecuXImage,
+      {
+        assetName: "SecuX #0001",
+        collectionName: "SecuX"
+      },
+
+      path,
+      {
+        nonce,
+        to: contractAddress,
+        value: 0,
+        chainId: 3,
+        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas.toHexString(),
+        maxFeePerGas: feeData.maxFeePerGas.toHexString(),
+        gasLimit: 100000,
+        data 
+      }
+    );
+    // --------------------------------------------------------------------
+
+    setTransaction(raw_tx);  // signed transaction
+  }
+
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
+  return (
+    <div>
+      <Button onClick={() => useSecuX(SignNFT, "ble")}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```

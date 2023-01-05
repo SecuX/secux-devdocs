@@ -62,7 +62,7 @@ const config = {
             position: 'left',
             label: 'API',
           },
-          {to: '/blog', label: 'Blog', position: 'left'},
+        //   {to: '/blog', label: 'Blog', position: 'left'},
         //   {
         //     href: 'https://github.com/facebook/docusaurus',
         //     label: 'GitHub',
@@ -119,6 +119,9 @@ const config = {
         theme: lightCodeTheme,
         darkTheme: darkCodeTheme,
       },
+      liveCodeBlock: {
+        playgroundPosition: 'top',
+      }
     }),
 };
 
