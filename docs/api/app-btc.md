@@ -13,6 +13,7 @@ BTC package for SecuX device
 **Kind**: global class  
 <h2>Properties</h2>
 
+
 ### addressConvert
 ***
 SecuxBTC.addressConvert(publickey, path) ⇒ <code>string</code>
@@ -28,6 +29,7 @@ SecuxBTC.addressConvert(publickey, path) ⇒ <code>string</code>
 | path | <code>string</code> \| [<code>PathObject</code>](#PathObject) | BIP32 path, ex: m/44'/0'/0'/0/0 |
 
 <br/>
+
 
 ### prepareAddress
 ***
@@ -45,6 +47,7 @@ SecuxBTC.prepareAddress(path, [option]) ⇒ [<code>communicationData</code>](#co
 
 <br/>
 
+
 ### resolveAddress
 ***
 SecuxBTC.resolveAddress(response, path) ⇒ <code>string</code>
@@ -60,6 +63,7 @@ SecuxBTC.resolveAddress(response, path) ⇒ <code>string</code>
 | path | <code>string</code> \| [<code>PathObject</code>](#PathObject) | BIP32 path, ex: m/44'/0'/0'/0/0 |
 
 <br/>
+
 
 ### preparePublickey
 ***
@@ -77,6 +81,7 @@ SecuxBTC.preparePublickey(path, [option]) ⇒ [<code>communicationData</code>](#
 
 <br/>
 
+
 ### resolvePublickey
 ***
 SecuxBTC.resolvePublickey(response) ⇒ <code>string</code>
@@ -92,6 +97,7 @@ SecuxBTC.resolvePublickey(response) ⇒ <code>string</code>
 
 <br/>
 
+
 ### prepareXPublickey
 ***
 SecuxBTC.prepareXPublickey(path) ⇒ [<code>communicationData</code>](#communicationData)
@@ -106,6 +112,7 @@ SecuxBTC.prepareXPublickey(path) ⇒ [<code>communicationData</code>](#communica
 | path | <code>string</code> | BIP32 path, ex: m/44'/0'/0'/0/0 |
 
 <br/>
+
 
 ### resolveXPublickey
 ***
@@ -123,6 +130,7 @@ SecuxBTC.resolveXPublickey(response, path) ⇒ <code>string</code>
 
 <br/>
 
+
 ### prepareSign
 ***
 SecuxBTC.prepareSign(inputs, outputs, [option]) ⇒ [<code>prepared</code>](#prepared)
@@ -139,6 +147,7 @@ SecuxBTC.prepareSign(inputs, outputs, [option]) ⇒ [<code>prepared</code>](#pre
 
 <br/>
 
+
 ### resolveSignatureList
 ***
 SecuxBTC.resolveSignatureList(response) ⇒ <code>Array&lt;string&gt;</code>
@@ -153,6 +162,7 @@ SecuxBTC.resolveSignatureList(response) ⇒ <code>Array&lt;string&gt;</code>
 | response | [<code>communicationData</code>](#communicationData) | data from device |
 
 <br/>
+
 
 ### resolveTransaction
 ***
@@ -169,6 +179,7 @@ SecuxBTC.resolveTransaction(response, params) ⇒ <code>string</code>
 | params | [<code>TransactionObject</code>](#TransactionObject) |  |
 
 <br/>
+
 
 ### deriveAddress
 ***
@@ -188,6 +199,7 @@ SecuxBTC.deriveAddress(xpub, change, addressIndex, [option]) ⇒ <code>string</c
 
 <br/>
 
+
 ### getVirtualSize
 ***
 SecuxBTC.getVirtualSize(inputs, outputs) ⇒ <code>number</code>
@@ -201,6 +213,23 @@ SecuxBTC.getVirtualSize(inputs, outputs) ⇒ <code>number</code>
 | --- | --- |
 | inputs | [<code>Array&lt;ScriptType&gt;</code>](#ScriptType) | 
 | outputs | [<code>Array&lt;ScriptType&gt;</code>](#ScriptType) | 
+
+<br/>
+
+
+### getDustThreshold
+***
+SecuxBTC.getDustThreshold(output, [dustRelayFee]) ⇒ <code>number</code>
+***
+
+*Estimate dust threshold of an output.*
+
+**Returns**: <code>number</code> - dust threshold  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| output | [<code>ScriptType</code>](#ScriptType) |  | script type of txout |
+| [dustRelayFee] | <code>number</code> | <code>3</code> | satoshis/vB, default: 3 |
 
 <br/>
 
@@ -278,7 +307,7 @@ SecuxBTC.getVirtualSize(inputs, outputs) ⇒ <code>number</code>
 | publickey | <code>string</code> \| <code>Buffer</code> | scep256k1 publickey from `path` |
 | hash | <code>string</code> | referenced transaction hash |
 | vout | <code>number</code> | referenced transaction output index |
-| satoshis | <code>number</code> | referenced transaction output amount |
+| satoshis | <code>number</code> \| <code>string</code> | referenced transaction output amount |
 | [script] | [<code>ScriptType</code>](#ScriptType) | script type related to `path` |
 | [txHex] | <code>string</code> | referenced raw transaction for validation |
 <br/>
@@ -302,7 +331,7 @@ SecuxBTC.getVirtualSize(inputs, outputs) ⇒ <code>number</code>
 | Name | Type | Description |
 | --- | --- | --- |
 | address | <code>string</code> | receiving address |
-| satoshis | <code>number</code> | receiving amount |
+| satoshis | <code>number</code> \| <code>string</code> | receiving amount |
 <br/>
 
 <a name="txOutputScriptExtened"></a>
@@ -314,7 +343,7 @@ SecuxBTC.getVirtualSize(inputs, outputs) ⇒ <code>number</code>
 | --- | --- | --- |
 | path | <code>string</code> | BIP32 path |
 | publickey | <code>string</code> \| <code>Buffer</code> | scep256k1 publickey from `path` |
-| satoshis | <code>number</code> | amount |
+| satoshis | <code>number</code> \| <code>string</code> | amount |
 | [script] | [<code>ScriptType</code>](#ScriptType) | script type related to `path` |
 <br/>
 

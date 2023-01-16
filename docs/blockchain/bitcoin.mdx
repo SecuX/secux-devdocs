@@ -208,3 +208,84 @@ function Example(props) {
   );
 }
 ```
+
+### Get dust threshold
+Dust is used as low value outputs containing in transaction, Bitcoin Core and other nodes refuse to relay or mine.
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxBTC, ScriptType } from "@secux/app-btc";
+
+function Example(props) {
+  const [dust, setDust] = useState('');
+
+  async function estimate() {
+    const dust = SecuxBTC.getDustThreshold(ScriptType.P2WPKH);
+    setDust(dust);
+  }
+
+  return (
+    <div>
+      <Button onClick={estimate}/>
+      <h2>{dust}</h2>
+    </div>
+  );
+}
+```
+
+### Generate publickey
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxBTC } from "@secux/app-btc";
+
+function Example(props) {
+  const [pubkey, setPubkey] = useState('');
+
+  async function GeneratePubkey(device) {
+    // set BIP-32 path for Bitcoin.
+    const path = "m/84'/1'/0'/0/0";
+    const buffer = SecuxBTC.preparePublickey(path);
+    const response = await device.Exchange(buffer);
+    const pubkey = SecuxBTC.resolvePublickey(response);
+
+    setPubkey(`0x${pubkey}`);
+  }
+
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
+  return (
+    <div>
+      <Button onClick={() => useSecuX(GeneratePubkey, "ble")}/>
+      <h2>{pubkey}</h2>
+    </div>
+  );
+}
+```
+
+### Generate extended publickey
+An extended public key, or xpub, is a public key which can be used to derive child public keys as part of a Hierarchical Deterministic (HD) wallet.
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxBTC } from "@secux/app-btc";
+
+function Example(props) {
+  const [xpub, setXpub] = useState('');
+
+  async function GenerateXpub(device) {
+    const path = "m/84'/1'/0'";
+    const buffer = SecuxBTC.prepareXPublickey(path);
+    const response = await device.Exchange(buffer);
+    const xpub = SecuxBTC.resolveXPublickey(response, path);
+
+    setXpub(xpub);
+  }
+
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
+  return (
+    <div>
+      <Button onClick={() => useSecuX(GenerateXpub, "ble")}/>
+      <h2>{xpub}</h2>
+    </div>
+  );
+}
+```
