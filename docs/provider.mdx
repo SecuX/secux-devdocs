@@ -1,0 +1,144 @@
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Ethereum Provider API
+
+
+This article explains how to integrate with SecuX hardware wallet under [EIP-1193](https://eips.ethereum.org/EIPS/eip-1193).
+This API allows websites to request users' Ethereum accounts, read data from blockchains the user is connected to, 
+and suggest that the user sign messages and transactions.
+
+### Supported Signing Method
+As the Ethereum API standard [EIP-1193](https://eips.ethereum.org/EIPS/eip-1193), 
+dapp can access to Ethereum for consistency across EIP-1193 applied wallets, 
+such as [Metamask](https://docs.metamask.io/guide/ethereum-provider.html), 
+[Walletconnect](https://docs.walletconnect.com/1.0/quick-start/dapps/web3-provider), 
+and so on.
+
+- eth_signTransaction
+- eth_sendTransaction
+- eth_signTypedData
+- eth_signTypedData_v3
+- eth_signTypedData_v4
+- personal_sign
+- eth_sign
+
+## Installation
+```bash npm
+npm install @secux/providers
+```
+
+## Importing
+
+<Tabs>
+<TabItem value="Node.js" default>
+
+```js
+import { EIP1193Provider } from "@secux/providers";
+```
+
+</TabItem>
+
+<TabItem value="Web Browser">
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/@secux/providers@^3/dist/index.js" 
+    type="application/javascript"></script>
+```
+
+</TabItem>
+</Tabs>
+
+
+<Tabs>
+
+<TabItem value="global" default>
+
+```js
+const rpcUrl = "https://eth-mainnet.public.blastapi.io";
+const provider = new EIP1193Provider(rpcUrl);
+window.secux = provider;
+```
+
+</TabItem>
+
+<TabItem value="web3.js">
+
+```js
+import Web3 from "web3";
+
+const rpcUrl = "https://eth-mainnet.public.blastapi.io";
+const provider = new EIP1193Provider(rpcUrl);
+const web3 = new Web3(provider);
+```
+
+</TabItem>
+
+<TabItem value="ethers.js">
+
+```js
+import { ethers } from "ethers";
+
+const rpcUrl = "https://eth-mainnet.public.blastapi.io";
+const provider = new EIP1193Provider(rpcUrl);
+const web3 = new ethers.providers.Web3Provider(provider);
+```
+
+</TabItem>
+</Tabs>
+
+## Guide
+We have injected a global API into this website at `window.secux`, if you are familiar with Metamask, you can try it on Chrome DevTools.
+
+### Connecting to SecuX
+You must provide a button to allow the user to connect SecuX hardware wallet to your dapp, because of sercurity precaution from Chrome W3C API.
+```jsx live
+function Example(props) {
+  const [account, setAccount] = useState('');  
+
+  async function AccessAccount() {
+    // "ble", "usb", "hid" are available here, default value is "ble".
+    // "usb" for W20/V20, "hid" for Nifty.
+    const accounts = await secux.request({
+      method: 'eth_requestAccounts',
+      params: ["ble"]
+    });
+    const account = accounts[0];
+
+    setAccount(account);
+  }
+
+  return (
+    <div>
+      <Button onClick={AccessAccount}/>
+      <h2>{account}</h2>
+    </div>
+  );
+}
+```
+
+### Send Transaction
+```jsx live
+function Example(props) {
+  async function SendTransaction() {
+    const result = await secux.request({
+      method: 'eth_sendTransaction',
+      params: [
+        {
+          to: "0x000000000000000000000000000000000000dEaD",
+          value: "0x29a2241af62c0000",
+          // gasPrice: "0x09184e72a000",
+          // gas: "0x2710",
+        }
+      ]
+    });
+    console.log(result);
+  }
+
+  return (
+    <div>
+      <Button onClick={SendTransaction}/>
+    </div>
+  );
+}
+```
