@@ -94,7 +94,7 @@ We have injected a global API into this website at `window.secux`, if you are fa
 You must provide a button to allow the user to connect SecuX hardware wallet to your dapp, because of sercurity precaution from Chrome W3C API.
 ```jsx live
 function Example(props) {
-  const [account, setAccount] = useState('');  
+  const [account, setAccount] = useState('');
 
   async function AccessAccount() {
     // "ble", "usb", "hid" are available here, default value is "ble".
@@ -139,6 +139,34 @@ function Example(props) {
   return (
     <div>
       <Button onClick={SendTransaction}/>
+    </div>
+  );
+}
+```
+
+### Switch Account
+```jsx live
+function Example(props) {
+  const [account, setAccount] = useState('');
+
+  useMemo(() => {
+    // register event
+    // secux.on("accountsChanged", (accounts) => {
+    //   setAccount(accounts[0]);
+    // });
+  }, []);
+
+  async function SwitchAccount() {
+    const accountIndex = 1;
+    const account = await secux.setAccount(accountIndex);
+
+    setAccount(account);
+  }
+
+  return (
+    <div>
+      <Button onClick={SwitchAccount}/>
+      <h2>{account}</h2>
     </div>
   );
 }
