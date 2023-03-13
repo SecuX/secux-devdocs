@@ -30,7 +30,7 @@
     "@secux/app-trx": "^3.0.3",
     "@secux/app-xlm": "^3.0.0",
     "@secux/app-xrp": "^3.0.3",
-    "@secux/providers": "^3.0.2",
+    "@secux/providers": "^3.0.6",
     "@secux/transport-webble": "^3.1.1",
     "@secux/transport-webhid": "^3.0.1",
     "@secux/transport-webusb": "^3.1.1",

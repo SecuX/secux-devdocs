@@ -171,3 +171,36 @@ function Example(props) {
   );
 }
 ```
+
+### Switch EVM chain
+```jsx live
+function Example(props) {
+  const [chainId, setChainId] = useState('');
+
+  useMemo(() => {
+    // register event
+    // secux.on("connect", ({ chainId }) => {
+    //   setChainId(chainId);
+    // });
+    // secux.on("chainChanged", ({ chainId }) => {
+    //   alert(`chainId: ${ chainId }`);
+    // });
+  }, []);
+
+  async function SwitchChain() {
+    secux.once("connect", ({ chainId }) => {
+      setChainId(chainId);
+    });
+
+    // change rpc url
+    await secux.connect("https://rpc.ankr.com/eth_goerli");
+  }
+
+  return (
+    <div>
+      <Button onClick={SwitchChain}/>
+      <h2>{chainId}</h2>
+    </div>
+  );
+}
+```
