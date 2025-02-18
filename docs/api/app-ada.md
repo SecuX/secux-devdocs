@@ -186,6 +186,22 @@ SecuxADA.prepareWithdraw(input, amount, [option]) ⇒ [<code>prepared</code>](#p
 
 <br/>
 
+### prepareVoteDelegation
+***
+SecuxADA.prepareVoteDelegation(input, drep, [option]) ⇒ [<code>prepared</code>](#prepared)
+***
+
+*Prepare data for signing.*
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| input | [<code>stakeInput</code>](#stakeInput) |  |
+| drep | [<code>DrepType</code>](#DrepType) | voting option |
+| [option] | [<code>withdrawOption</code>](#withdrawOption) |  |
+
+<br/>
+
 ## Types
 
 <a name="communicationData"></a>
@@ -347,5 +363,16 @@ SecuxADA.prepareWithdraw(input, amount, [option]) ⇒ [<code>prepared</code>](#p
 | --- | --- | --- |
 | commandData | [<code>communicationData</code>](#communicationData) | data for sending to device |
 | serialized | [<code>communicationData</code>](#communicationData) |  |
+<br/>
+
+<a name="DrepType"></a>
+
+### DrepType : <code>enum</code>
+*Voting option for DReps*
+
+| Name | Type | Description |
+| --- | --- | --- |
+| ABSTAIN | <code>number</code> | 0 |
+| NO | <code>number</code> | 1 |
 <br/>
 

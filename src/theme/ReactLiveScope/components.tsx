@@ -86,7 +86,11 @@ export async function useSecuX(callback, transport = "usb") {
         e = error;
     }
 
-    await device.Disconnect();
+    try {
+        await device.Disconnect();
+    } catch (error) {
+
+    }
 
     if (e) alert(e);
 }

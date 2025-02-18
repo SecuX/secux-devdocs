@@ -246,18 +246,20 @@ function Example(props) {
       headers: { "project_id": "<api key>" }
     });
     const utxos = (await api.get(`/addresses/${fromAddress}/utxos`)).data;
-    const utxo = {
-      txId: utxos[0].tx_hash,
-      index: utxos[0].output_index,
-      amount: utxos[0].amount[0].quantity
-    };
+    const inputs = utxos.map(utxo => (
+      {
+        txId: utxo.tx_hash,
+        index: utxo.output_index,
+        amount: utxo.amount[0].quantity
+      }
+    ));
     const { withdrawable_amount } = (await api.get(`/accounts/${rewardAddress}`)).data;
 
     // ------------------------- signing by SecuX -------------------------
     const { commandData, serialized } = SecuxADA.prepareWithdraw(
       {
         path,
-        utxo,
+        utxo: inputs,
         changeAddress: fromAddress,
         xpublickey
       },
@@ -309,18 +311,20 @@ function Example(props) {
       headers: { "project_id": "<api key>" }
     });
     const utxos = (await api.get(`/addresses/${fromAddress}/utxos`)).data;
-    const utxo = {
-      txId: utxos[0].tx_hash,
-      index: utxos[0].output_index,
-      amount: utxos[0].amount[0].quantity
-    };
+    const inputs = utxos.map(utxo => (
+      {
+        txId: utxo.tx_hash,
+        index: utxo.output_index,
+        amount: utxo.amount[0].quantity
+      }
+    ));
     const { withdrawable_amount } = (await api.get(`/accounts/${rewardAddress}`)).data;
 
     // ------------------------- signing by SecuX -------------------------
     const { commandData, serialized } = SecuxADA.prepareUnstake(
       {
         path,
-        utxo,
+        utxo: inputs,
         changeAddress: fromAddress,
         xpublickey
       },
@@ -329,6 +333,71 @@ function Example(props) {
         { withdrawAmount: withdrawable_amount }
         : 
         undefined
+    );
+    const response = await device.Exchange(commandData);
+    const signedTx = SecuxADA.resolveTransaction(response, serialized);
+    // --------------------------------------------------------------------
+
+    setTransaction(signedTx);
+  }
+
+  // "ble", "usb", "hid" are available here.
+  // "usb" for W20/V20, "hid" for Nifty.
+  return (
+    <div>
+      <Button onClick={() => useSecuX(MakeTransaction, "ble")}/>
+      <h2>{tranasction}</h2>
+    </div>
+  );
+}
+```
+
+### Vote delegation
+```jsx live
+// We cannot import packages in live editor, please uncomment it for use.
+// import { SecuxADA, AddressType } from "@secux/app-ada";
+// import axios from "axios";
+
+function Example(props) {
+  const [tranasction, setTransaction] = useState('');
+
+  async function MakeTransaction(device) {
+    // set BIP-32 path for Cardano.
+    const path = "m/1852'/1815'/0'";
+    const xpublickey = await device.getXPublickey(path);
+    const fromAddress = SecuxADA.addressConvert(
+      xpublickey, 
+      AddressType.BASE
+    );
+    const rewardAddress = SecuxADA.addressConvert(
+      xpublickey, 
+      AddressType.REWARD
+    );
+
+    // fetch data from cardano api
+    const api = axios.create({
+      baseURL: "https://cardano-mainnet.blockfrost.io/api/v0",
+      headers: { "project_id": "<api key>" }
+    });
+    const utxos = (await api.get(`/addresses/${fromAddress}/utxos`)).data;
+
+    const inputs = utxos.map(utxo => (
+      {
+        txId: utxo.tx_hash,
+        index: utxo.output_index,
+        amount: utxo.amount[0].quantity
+      }
+    ));
+
+    // ------------------------- signing by SecuX -------------------------
+    const { commandData, serialized } = SecuxADA.prepareVoteDelegation(
+      {
+        path,
+        utxo: inputs,
+        changeAddress: fromAddress,
+        xpublickey
+      },
+      DrepType.ABSTAIN
     );
     const response = await device.Exchange(commandData);
     const signedTx = SecuxADA.resolveTransaction(response, serialized);
